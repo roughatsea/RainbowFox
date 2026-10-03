@@ -9,22 +9,27 @@
 </style>
 </head>
 <body>
-<canvas id="forest" aria-label="A third-person neon forest. Control a luminous fox with arrow keys or WASD; Shift to run, Space to leap." role="img"></canvas>
-<div id="intro"><div class="card"><div class="eyebrow">A small journey through the dark</div><h1>Rainbow Fox</h1><div class="subtitle">The forest remembers every footstep.<br>Follow the lights. Leave a little of your own.</div><button class="enter" id="enter">Enter the forest</button><div class="instructions"><span class="desktop">WASD / ARROWS &nbsp; wander &nbsp; · &nbsp; SHIFT &nbsp; run &nbsp; · &nbsp; SPACE &nbsp; leap<br></span>Headphones welcome. No destination required.</div></div></div>
+<canvas id="forest" aria-label="A third-person neon forest. Control a luminous fox with arrow keys or WASD; Shift to run, Space to leap. Hold the right mouse button and drag to orbit the camera." role="img"></canvas>
+<div id="intro"><div class="card"><div class="eyebrow">A small journey through the dark</div><h1>Rainbow Fox</h1><div class="subtitle">The forest remembers every footstep.<br>Follow the lights. Leave a little of your own.</div><button class="enter" id="enter">Enter the forest</button><div class="instructions"><span class="desktop">WASD / ARROWS &nbsp; wander &nbsp; · &nbsp; SHIFT &nbsp; run &nbsp; · &nbsp; SPACE &nbsp; leap<br>RIGHT MOUSE + DRAG &nbsp; look around &nbsp; · &nbsp; WHEEL &nbsp; zoom<br></span>Headphones welcome. No destination required.</div></div></div>
 <div id="hud"><div class="brand">Rainbow Fox<small>A FOREST OF LIGHT</small></div><div class="controls"><button class="icon" id="sound" aria-pressed="false">Sound off</button><button class="icon" id="helpButton">Guide</button><button class="icon" id="pause">Pause</button></div><div class="message" id="message"></div><div class="bottom">WANDER FREELY &nbsp; / &nbsp; FOLLOW THE DRIFTING LIGHTS</div></div>
 <div id="touch"><div class="group"><button data-key="arrowleft" aria-label="Turn left">↶</button><button data-key="arrowup" aria-label="Walk forward">↑</button><button data-key="arrowright" aria-label="Turn right">↷</button></div><div class="group"><button data-key="shift" aria-label="Run">Run</button><button data-key=" " aria-label="Leap">✧</button></div></div>
-<div id="help"><div class="card"><div class="eyebrow">Find your own pace</div><h2>Nothing is chasing you.</h2><p>W / ↑ moves forward. S / ↓ steps back.<br>A / ← and D / → turn through the forest.<br>Hold Shift to run. Press Space to leap.<br>Escape pauses. Sound is optional.</p><p>Approach the little clusters of floating lights.<br>They will remember you, then drift away.</p><button class="enter" id="closeHelp">Return to the trees</button></div></div>
+<div id="help"><div class="card"><div class="eyebrow">Find your own pace</div><h2>Nothing is chasing you.</h2><p>W / ↑ moves forward. S / ↓ steps back.<br>A / ← and D / → turn through the forest.<br>Right mouse + drag orbits the camera. Wheel zooms.<br>While holding right mouse, W follows the camera<br>and A / D move sideways.<br>Hold Shift to run. Press Space to leap.<br>Escape pauses. Sound is optional.</p><p>Approach the little clusters of floating lights.<br>They will remember you, then drift away.</p><button class="enter" id="closeHelp">Return to the trees</button></div></div>
 <script>
 'use strict';
 (() => {
 const canvas=document.getElementById('forest'),ctx=canvas.getContext('2d',{alpha:false});
 const $=id=>document.getElementById(id);
 const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
-let W=innerWidth,H=innerHeight,dpr=1,started=false,paused=false,last=0,t=0,steps=0;
+let W=innerWidth,H=innerHeight,dpr=1,started=false,paused=false,last=0,t=0;
 const keys=new Set();
-const fox={x:0,z:0,a:0,speed:0,jump:0,vy:0};
-const camera={x:0,z:-9,y:3.6,a:0};
-let focal=700,horizon=0,camSin=0,camCos=1;
+const fox={x:0,z:0,a:0,speed:0,jump:0,vy:0,turn:0,vx:0,vz:0,gait:0,activity:0,landing:0};
+const camera={x:0,z:-8,y:3,a:0,pitch:.24,yaw:0,elevation:.24,distance:8,zoom:8,focusX:0,focusZ:0,focusY:1};
+const orbit={active:false,pointerId:null,x:0,y:0};
+const TAU=Math.PI*2;
+const clamp=(v,lo,hi)=>Math.max(lo,Math.min(hi,v));
+const mix=(a,b,u)=>a+(b-a)*u;
+const angleDelta=(a,b)=>Math.atan2(Math.sin(a-b),Math.cos(a-b));
+let focal=700,horizon=0,camSin=0,camCos=1,pitchSin=0,pitchCos=1;
 let seed=8128;const rand=()=>{seed=(seed*1664525+1013904223)>>>0;return seed/4294967296};
 const colors=['#ff577d','#ff9852','#ffe477','#7fffad','#53e4ed','#7e9bff','#cf8cff'];
 const trees=[],ground=[],wisps=[],trails=[];
@@ -53,42 +58,148 @@ for(let n=0;n<100;n++){
 for(let i=0;i<2200;i++)ground.push({x:(rand()-.5)*radius*2,z:(rand()-.5)*radius*2,y:rand()*.08,c:Math.floor(rand()*7),s:.5+rand()});
 for(let i=0;i<18;i++)wisps.push({x:(rand()-.5)*130,z:8+rand()*145,y:1.1+rand()*2.4,phase:rand()*6.28,found:false,c:i%7});
 wisps[0].x=0;wisps[0].z=14;wisps[1].x=1;wisps[1].z=34;wisps[2].x=-2;wisps[2].z=57;
-// A dense warm fox silhouette built from small points rather than a solid mesh.
-const fur=[];
-function ellipsoid(cx,cy,cz,rx,ry,rz,count,shade){
+// Anatomical particle forms. Parts are posed each frame, keeping markings attached to fur.
+const furColors=['#ed9750','#ffecd0','#a74933','#50374a','#cbf4ff','#c77a41','#ffb966'];
+const parts={};
+function ellipsoid(name,cx,cy,cz,rx,ry,rz,count,shade){
+ const points=parts[name]||(parts[name]=[]);
  for(let i=0;i<count;i++){
-  const a=rand()*6.283,v=rand()*2-1,r=Math.sqrt(1-v*v);
-  fur.push([cx+rx*r*Math.cos(a),cy+ry*v,cz+rz*r*Math.sin(a),shade,rand()*.6+.5]);
+  const a=rand()*TAU,v=rand()*2-1,r=Math.sqrt(1-v*v);
+  const x=cx+rx*r*Math.cos(a),y=cy+ry*v,z=cz+rz*r*Math.sin(a);
+  const c=typeof shade==='function'?shade(x,y,z):shade;
+  points.push([x,y,z,c,.65+rand()*.55]);
  }
 }
-ellipsoid(0,.88,0,.32,.35,.73,430,0);
-ellipsoid(0,1.13,.56,.26,.31,.32,160,0);
-ellipsoid(0,1.23,.84,.21,.23,.32,160,1);
-ellipsoid(0,1.14,1.08,.13,.12,.28,110,1);
-ellipsoid(0,1.11,1.34,.065,.065,.055,24,3);
-for(const side of [-1,1])for(let i=0;i<95;i++){
- const u=rand(),width=(1-u)*.13;
- fur.push([side*.17+(rand()-.5)*width*2,1.4+u*.43,.72+(rand()-.5)*width*1.8,2,.7]);
+// Narrow waist, deep chest, distinct shoulders and haunches rather than one oval.
+ellipsoid('body',0,1.04,-.06,.245,.255,.76,510,(x,y,z)=>y<.89?1:y>1.20?5:0);
+ellipsoid('body',0,1.06,.40,.285,.335,.34,250,(x,y,z)=>z>.54&&y<1.1?1:0);
+ellipsoid('body',0,1.04,-.54,.27,.29,.31,200,(x,y,z)=>y>1.18?5:0);
+ellipsoid('neck',0,1.27,.64,.215,.34,.26,200,(x,y,z)=>z>.73||y<1.14?1:0);
+ellipsoid('head',0,1.49,.88,.23,.23,.29,250,(x,y,z)=>y<1.42?1:y>1.6?5:0);
+ellipsoid('head',-.17,1.40,1.01,.10,.125,.18,65,1);
+ellipsoid('head',.17,1.40,1.01,.10,.125,.18,65,1);
+// A tapered, pointed muzzle with a dark nose and cheek markings.
+for(let i=0;i<220;i++){
+ const u=rand(),a=rand()*TAU,r=mix(.165,.045,u);
+ parts.head.push([Math.cos(a)*r,1.40-u*.045+Math.sin(a)*r*.62,1.05+u*.48,Math.sin(a)<-.15?1:0,.7+rand()*.4]);
 }
-// The tail and legs are animated separately.
-const tail=[];for(let i=0;i<350;i++){const u=rand(),a=rand()*6.28,r=Math.sin(u*Math.PI)*.26;tail.push([Math.cos(a)*r,Math.sin(a)*r,u,u>.72?1:0,.5+rand()*.6]);}
-const furColors=['#ffb76f','#ffe5bf','#ff9c87','#654662','#baf7ff'];
-function resize(){W=innerWidth;H=innerHeight;dpr=Math.min(devicePixelRatio||1,1.5);canvas.width=Math.round(W*dpr);canvas.height=Math.round(H*dpr);ctx.setTransform(dpr,0,0,dpr,0,0);focal=Math.min(W,H)*.97;horizon=H*.40;}
+ellipsoid('head',0,1.355,1.55,.058,.046,.045,36,3);
+// Triangular ear surfaces: wide at the base, narrow at the tip, dark on the back.
+for(const side of [-1,1]){
+ const name=side<0?'earLeft':'earRight';parts[name]=[];
+ for(let i=0;i<200;i++){
+  const u=rand(),width=(1-u)*.155;
+  const back=rand()<.48;
+  parts[name].push([side*(.175+u*.035)+(rand()*2-1)*width,1.62+u*.32,.86-u*.02+(1-u)*(back?-.105:.075),back?3:u>.83?3:2,.65+rand()*.35]);
+ }
+}
+const tail=[];
+for(let i=0;i<510;i++){
+ const u=rand(),a=rand()*TAU,r=.025+Math.pow(Math.sin(u*Math.PI),.75)*.25;
+ tail.push([Math.cos(a)*r,Math.sin(a)*r,u,u>.73?1:Math.sin(a)>.3?5:0,.65+rand()*.5]);
+}
+// Reusable tapered segments for articulated upper/lower legs, plus shaped paws.
+const limb=[];
+for(let i=0;i<100;i++){const u=rand(),a=rand()*TAU;limb.push([Math.cos(a),Math.sin(a),u,.6+rand()*.4]);}
+ellipsoid('paw',0,.065,.035,.082,.065,.135,55,3);
+const pose={bob:0,pitch:0,roll:0,neck:0,headYaw:0};
+const feet=[];
+function resize(){W=innerWidth;H=innerHeight;dpr=Math.min(devicePixelRatio||1,1.5);canvas.width=Math.round(W*dpr);canvas.height=Math.round(H*dpr);ctx.setTransform(dpr,0,0,dpr,0,0);focal=Math.min(W,H)*.97;horizon=H*.53;}
 addEventListener('resize',resize);resize();
 function wrap(v,center){return center+((v-center+radius)%(radius*2)+radius*2)%(radius*2)-radius;}
-function project(x,y,z){const dx=x-camera.x,dz=z-camera.z;const depth=dx*camSin+dz*camCos; if(depth<.5||depth>100)return null;const side=dx*camCos-dz*camSin;return [W*.5+side*focal/depth,horizon+(camera.y-y)*focal/depth,depth];}
+function project(x,y,z){
+ const dx=x-camera.x,dz=z-camera.z,dy=y-camera.y;
+ const horizontal=dx*camSin+dz*camCos,depth=horizontal*pitchCos-dy*pitchSin;
+ if(depth<.5||depth>100)return null;
+ const side=dx*camCos-dz*camSin,up=dy*pitchCos+horizontal*pitchSin;
+ return [W*.5+side*focal/depth,horizon-up*focal/depth,depth];
+}
 const dots=[];
 function dot(x,y,z,c,size,alpha=1){const p=project(x,y,z);if(!p||p[0]<-25||p[0]>W+25||p[1]<-25||p[1]>H+25)return;dots.push([p[0],p[1],p[2],c,Math.min(5,size*focal/p[2]),alpha]);}
-function foxDot(x,y,z,c,s){const sa=Math.sin(fox.a),ca=Math.cos(fox.a);dot(fox.x+x*ca+z*sa,y+fox.jump,fox.z+z*ca-x*sa,furColors[c],s,.57);}
-function drawFox(){
- const cycle=steps*2.7,bob=Math.sin(cycle*2)*Math.min(Math.abs(fox.speed)*.008,.07);
- for(const p of fur)foxDot(p[0],p[1]+bob,p[2],p[3],.006+p[4]*.006);
- for(const p of tail){const u=p[2],sway=Math.sin(t*2.8-u*2)*(.42+Math.abs(fox.speed)*.022);foxDot(p[0]+sway*u,.82+p[1]+u*.15+Math.sin(t*3-u)*.07,-.58-u*1.45,p[3],.017*p[4]);}
- for(const side of [-1,1])for(const front of [-1,1]){
-  const stride=Math.sin(cycle+(side*front>0?0:Math.PI))*Math.min(Math.abs(fox.speed)*.07,.46),lift=Math.max(0,Math.cos(cycle+(side*front>0?0:Math.PI)))*Math.min(Math.abs(fox.speed)*.028,.17);
-  for(let j=0;j<30;j++){const u=j/30;foxDot(side*.24+Math.sin(j*4)*.025,.72*(1-u)+.1+lift*u,front*.48+stride*u,j>22?2:0,.018);}
+function foxDot(x,y,z,c,s,body=false){
+ if(body){
+  // Flex the spine around its center; bank a little into a turn.
+  const py=y-1.04,cp=Math.cos(pose.pitch),sp=Math.sin(pose.pitch);
+  y=1.04+py*cp-z*sp+pose.bob;z=py*sp+z*cp;
+  const cr=Math.cos(pose.roll),sr=Math.sin(pose.roll),h=y-1.04;
+  const bx=x*cr-h*sr;y=1.04+x*sr+h*cr;x=bx;
  }
- foxDot(-.19,1.3,.99,4,.04);foxDot(.19,1.3,.99,4,.04);
+ const sa=Math.sin(fox.a),ca=Math.cos(fox.a);
+ dot(fox.x+x*ca+z*sa,y+fox.jump,fox.z+z*ca-x*sa,furColors[c],s,.68);
+}
+function drawPart(name,transform){for(const p of parts[name]){const q=transform?transform(p):p;foxDot(q[0],q[1],q[2],p[3],.006+p[4]*.0055,name==='body');}}
+function limbSegment(a,b,ra,rb,dark){
+ const v=b.map((n,i)=>n-a[i]),length=Math.hypot(...v)||1,n=v.map(q=>q/length);
+ const axis=Math.abs(n[0])<.9?[1,0,0]:[0,0,1];
+ const projection=axis.reduce((sum,q,i)=>sum+q*n[i],0);
+ let u=axis.map((q,i)=>q-projection*n[i]);const ul=Math.hypot(...u);u=u.map(q=>q/ul);
+ const w=[n[1]*u[2]-n[2]*u[1],n[2]*u[0]-n[0]*u[2],n[0]*u[1]-n[1]*u[0]];
+ for(const p of limb){const f=p[2],r=mix(ra,rb,f),q=a.map((v,i)=>mix(v,b[i],f)+(u[i]*p[0]+w[i]*p[1])*r);foxDot(q[0],q[1],q[2],dark?3:f>.83?5:0,.009*p[3]);}
+}
+// Two-bone IK keeps paws on the floor through the stance portion of each stride.
+function kneeBetween(hip,paw,upper,lower,bend){
+ const v=paw.map((q,i)=>q-hip[i]),raw=Math.hypot(...v),n=v.map(q=>q/(raw||1));
+ const d=clamp(raw,.08,upper+lower-.001);
+ const along=(upper*upper-lower*lower+d*d)/(2*d),out=Math.sqrt(Math.max(0,upper*upper-along*along));
+ const axis=[0,0,-bend],projection=axis.reduce((sum,q,i)=>sum+q*n[i],0);
+ let perpendicular=axis.map((q,i)=>q-projection*n[i]);const length=Math.hypot(...perpendicular)||1;perpendicular=perpendicular.map(q=>q/length);
+ return hip.map((q,i)=>q+n[i]*along+perpendicular[i]*out);
+}
+function footPose(side,front,run){
+ const moving=fox.activity,duty=mix(.66,.38,run);
+ // Walking has four distinct contacts; a gallop brings each pair closer together.
+ const walkOffset=front?(side<0?0:.5):(side<0?.75:.25);
+ const gallopOffset=(front?0:.48)+(side<0?0:.10);
+ const phase=((fox.gait+mix(walkOffset,gallopOffset,run))%1+1)%1;
+ // The stance sweeps backward by exactly the distance traveled during contact.
+ const span=mix(1.35,2.15,run)*duty*moving;
+ const speed=Math.hypot(fox.vx,fox.vz)||1;
+ const lateral=(fox.vx*Math.cos(fox.a)-fox.vz*Math.sin(fox.a))/speed;
+ const longitudinal=(fox.vx*Math.sin(fox.a)+fox.vz*Math.cos(fox.a))/speed;
+ let z,y=0;
+ if(phase<duty)z=mix(span*.5,-span*.5,phase/duty);
+ else {const u=(phase-duty)/(1-duty);z=mix(-span*.5,span*.5,u);y=Math.sin(Math.PI*u)*mix(.15,.29,run)*moving;}
+ const rootZ=front?.48:-.54;
+ if(fox.jump>0){const tuck=clamp(fox.vy/5+.45,0,1);z=(front?-.24:.24)*tuck;y=.17+tuck*.27;}
+ return [side*(front?.225:.235)+z*lateral,.08+y,rootZ+z*(fox.jump>0?1:longitudinal)];
+}
+function drawFox(){
+ const run=clamp((Math.hypot(fox.vx,fox.vz)-3.5)/3.5,0,1),cycle=fox.gait*TAU;
+ const breathe=Math.sin(t*1.9)*.008*(1-fox.activity);
+ pose.bob=breathe+fox.activity*mix(Math.cos(cycle*2)*.019,Math.sin(cycle)*.065,run)-fox.landing*.065;
+ pose.pitch=fox.activity*run*Math.cos(cycle)*.075+clamp(fox.vy*.018,-.1,.1);
+ pose.roll=clamp(-fox.turn*Math.abs(fox.speed)*.016,-.14,.14);
+ pose.neck=pose.bob*.35;
+ pose.headYaw=clamp(fox.turn*.09,-.15,.15)+Math.sin(t*.6)*.045*(1-fox.activity);
+ drawPart('body');
+ drawPart('neck',p=>[p[0],p[1]+pose.neck,p[2]]);
+ const headTransform=p=>{
+  const x=p[0],z=p[2]-.72,sa=Math.sin(pose.headYaw),ca=Math.cos(pose.headYaw);
+  return [x*ca+z*sa,p[1]+pose.neck,.72+z*ca-x*sa];
+ };
+ drawPart('head',headTransform);
+ for(const name of ['earLeft','earRight'])drawPart(name,p=>{
+  const twitch=Math.pow(Math.max(0,Math.sin(t*1.3+(name==='earLeft'?0:2.3))),18)*.07;
+  return headTransform([p[0],p[1],p[2]-twitch*(p[1]-1.62)*2]);
+ });
+ // Eyes sit on the sides of the head instead of floating over the muzzle.
+ for(const side of [-1,1]){const q=headTransform([side*.211,1.515,1.03]);foxDot(q[0],q[1],q[2],3,.03);foxDot(q[0]+side*.003,q[1]+.003,q[2]+.012,4,.017);}
+ // A heavy brush follows the hips and bends with delayed waves, balancing turns.
+ for(const p of tail){
+  const u=p[2],wave=Math.sin(cycle-u*2.4)*fox.activity*.08+Math.sin(t*1.25-u*1.8)*.035;
+  const bend=clamp(fox.turn*.18,-.38,.38);
+  const x=p[0]+(wave-bend)*u*u;
+  const y=.99-u*.62+u*u*.14+p[1]+pose.bob*(1-u)+fox.activity*run*Math.sin(cycle-u)*.065;
+  foxDot(x,y,-.73-u*1.55,p[3],.007+p[4]*.006);
+ }
+ feet.length=0;
+ for(const side of [-1,1])for(const front of [true,false]){
+  const paw=footPose(side,front,run);feet.push(paw);
+  const root=[side*(front?.23:.24),1.05+pose.bob+(front?-1:1)*pose.pitch*.5,front?.46:-.55];
+  if(front){const knee=kneeBetween(root,paw,.54,.56,1);limbSegment(root,knee,.10,.061,false);limbSegment(knee,paw,.06,.038,true);}
+  else {const hock=[paw[0],paw[1]+.19,paw[2]-.10],knee=kneeBetween(root,hock,.48,.46,-1);limbSegment(root,knee,.145,.075,false);limbSegment(knee,hock,.075,.046,false);limbSegment(hock,paw,.047,.034,true);}
+  drawPart('paw',p=>[p[0]+paw[0],p[1]+paw[1]-.065,p[2]+paw[2]]);
+ }
 }
 let messageUntil=0,messageIndex=0,discoveries=0;
 const messages=['Let the dark make room for you.','Some lights are only passing through.','Even here, you are not alone.','The trees keep your little secrets.','There is no hurry to arrive.'];
@@ -97,18 +208,44 @@ function leap(){if(started&&!paused&&fox.jump===0){fox.vy=5.1;if(audio)chime(640
 function update(dt){
  t+=dt;
  const forward=keys.has('w')||keys.has('arrowup'),back=keys.has('s')||keys.has('arrowdown');
- const turning=(keys.has('a')||keys.has('arrowleft')? -1:0)+(keys.has('d')||keys.has('arrowright')?1:0);
- fox.a+=turning*dt*(1.35+Math.abs(fox.speed)*.035);
- const target=started?(forward?(keys.has('shift')?10:4.3):(back?-2.4:0)):0;
- fox.speed+=(target-fox.speed)*(1-Math.exp(-dt*3.5));
- fox.x+=Math.sin(fox.a)*fox.speed*dt;fox.z+=Math.cos(fox.a)*fox.speed*dt;steps+=Math.abs(fox.speed)*dt;
+ const turning=(keys.has('a')||keys.has('arrowleft')?-1:0)+(keys.has('d')||keys.has('arrowright')?1:0);
+ const oldAngle=fox.a;
+ if(orbit.active){
+  if(forward||back||turning)fox.a+=angleDelta(camera.yaw,fox.a)*(1-Math.exp(-dt*12));
+ }else fox.a+=turning*dt*(1.35+Math.abs(fox.speed)*.035);
+ fox.turn+=(angleDelta(fox.a,oldAngle)/dt-fox.turn)*(1-Math.exp(-dt*7));
+ const pace=keys.has('shift')?8.2:3.1;
+ const target=started?(forward?pace:back?-2.1:0):0;
+ fox.speed+=(target-fox.speed)*(1-Math.exp(-dt*4.5));
+ let dx=Math.sin(fox.a)*fox.speed,dz=Math.cos(fox.a)*fox.speed;
+ if(orbit.active&&turning&&started){
+  // RMB converts A/D to camera-relative strafing, including diagonal movement.
+  const strafe=turning*pace*.8,normal=forward||back?Math.SQRT1_2:1;
+  dx=(dx+Math.cos(camera.yaw)*strafe)*normal;dz=(dz-Math.sin(camera.yaw)*strafe)*normal;
+ }
+ fox.vx+=(dx-fox.vx)*(1-Math.exp(-dt*12));fox.vz+=(dz-fox.vz)*(1-Math.exp(-dt*12));
+ const oldX=fox.x,oldZ=fox.z;
+ fox.x+=fox.vx*dt;fox.z+=fox.vz*dt;
  // Soft collision gently slides the fox around trunks.
  for(const tree of trees){const x=wrap(tree.x,fox.x),z=wrap(tree.z,fox.z),dx=fox.x-x,dz=fox.z-z,d=Math.hypot(dx,dz);if(d<.85){const a=d>.001?Math.atan2(dx,dz):fox.a+Math.PI/2;fox.x=x+Math.sin(a)*.85;fox.z=z+Math.cos(a)*.85;}}
- if(fox.jump>0||fox.vy>0){fox.vy-=dt*12;fox.jump=Math.max(0,fox.jump+fox.vy*dt);if(fox.jump===0)fox.vy=0;}
- const lag=1-Math.exp(-dt*4);camera.a+=Math.atan2(Math.sin(fox.a-camera.a),Math.cos(fox.a-camera.a))*lag;
- const distance=8.1+Math.abs(fox.speed)*.13;
- camera.x+=(fox.x-Math.sin(camera.a)*distance+Math.cos(camera.a)*1.5-camera.x)*lag;camera.z+=(fox.z-Math.cos(camera.a)*distance-Math.sin(camera.a)*1.5-camera.z)*lag;
- camera.y+=(4.1+Math.abs(fox.speed)*.035-camera.y)*lag;
+ const moved=Math.hypot(fox.x-oldX,fox.z-oldZ),actualSpeed=moved/dt;
+ fox.activity+=(clamp(actualSpeed/.7,0,1)-fox.activity)*(1-Math.exp(-dt*9));
+ const run=clamp((actualSpeed-3.5)/3.5,0,1);
+ if(fox.jump===0)fox.gait=(fox.gait+moved/mix(1.35,2.15,run))%1;
+ fox.landing*=Math.exp(-dt*10);
+ if(fox.jump>0||fox.vy>0){fox.vy-=dt*12;fox.jump=Math.max(0,fox.jump+fox.vy*dt);if(fox.jump===0){fox.vy=0;fox.landing=1;}}
+ const lag=1-Math.exp(-dt*6);
+ // An idle orbit stays where you leave it; walking normally restores the chase view.
+ if(!orbit.active&&(actualSpeed>.15||turning))camera.yaw+=angleDelta(fox.a,camera.yaw)*(1-Math.exp(-dt*3));
+ camera.a+=angleDelta(camera.yaw,camera.a)*lag;
+ camera.pitch+=(camera.elevation-camera.pitch)*lag;
+ camera.distance+=(camera.zoom-camera.distance)*lag;
+ camera.focusX+=(fox.x-camera.focusX)*lag;camera.focusZ+=(fox.z-camera.focusZ)*lag;
+ camera.focusY+=(1+fox.jump*.45-camera.focusY)*lag;
+ const distance=camera.distance+Math.abs(fox.speed)*.035;
+ camera.x=camera.focusX-Math.sin(camera.a)*Math.cos(camera.pitch)*distance;
+ camera.z=camera.focusZ-Math.cos(camera.a)*Math.cos(camera.pitch)*distance;
+ camera.y=camera.focusY+Math.sin(camera.pitch)*distance;
  if(started&&Math.abs(fox.speed)>.8&&rand()<dt*35){trails.push({x:fox.x+(rand()-.5)*.5,y:.1,z:fox.z-.3,life:1,c:colors[Math.floor(rand()*7)]});}
  for(let i=trails.length-1;i>=0;i--){trails[i].life-=dt*.45;trails[i].y+=dt*.13;if(trails[i].life<=0)trails.splice(i,1);}
  for(const w of wisps){const x=wrap(w.x,fox.x),z=wrap(w.z,fox.z);if(started&&!w.found&&Math.hypot(x-fox.x,z-fox.z)<3.5){w.found=true;w.when=t;discoveries++;message(messages[messageIndex++%messages.length]);if(audio){chime(440+70*w.c,.35);setTimeout(()=>{if(audio&&!paused)chime(660+100*w.c,.5);},220);}}if(w.found&&t-w.when>35){w.found=false;w.x=fox.x+(rand()-.5)*100;w.z=fox.z+(rand()-.5)*100;}}
@@ -116,7 +253,7 @@ function update(dt){
  if(audio)audio.gain.gain.setTargetAtTime(paused?0:.12+Math.abs(fox.speed)*.005,audio.context.currentTime,.3);
 }
 function render(){
- ctx.fillStyle='#000';ctx.fillRect(0,0,W,H);camSin=Math.sin(camera.a);camCos=Math.cos(camera.a);dots.length=0;
+ ctx.fillStyle='#000';ctx.fillRect(0,0,W,H);camSin=Math.sin(camera.a);camCos=Math.cos(camera.a);pitchSin=Math.sin(camera.pitch);pitchCos=Math.cos(camera.pitch);dots.length=0;
  // Fine pools of color are atmospheric light, not visible solid ground.
  const haze=ctx.createRadialGradient(W*.5,H*.5,0,W*.5,H*.5,Math.max(W,H)*.6);haze.addColorStop(0,'#100a1a');haze.addColorStop(.6,'#030408');haze.addColorStop(1,'#000');ctx.fillStyle=haze;ctx.fillRect(0,0,W,H);
  for(const g of ground){const x=wrap(g.x,fox.x),z=wrap(g.z,fox.z);dot(x,g.y,z,colors[g.c],.037*g.s,.72);}
@@ -147,15 +284,39 @@ function initAudio(){const AC=window.AudioContext||window.webkitAudioContext;if(
 function chime(f,duration){if(!audio)return;const ac=audio.context,osc=ac.createOscillator(),g=ac.createGain();osc.type='sine';osc.frequency.value=f;g.gain.setValueAtTime(0,ac.currentTime);g.gain.linearRampToValueAtTime(.22,ac.currentTime+.025);g.gain.exponentialRampToValueAtTime(.001,ac.currentTime+duration+1.5);osc.connect(g);g.connect(audio.gain);osc.start();osc.stop(ac.currentTime+duration+1.6);}
 $('sound').onclick=async()=>{try{if(!audio){if(!initAudio()){$('sound').textContent='Sound unavailable';return;}}const on=$('sound').getAttribute('aria-pressed')!=='true';if(on){await audio.context.resume();}else await audio.context.suspend();$('sound').setAttribute('aria-pressed',String(on));$('sound').textContent=on?'Sound on':'Sound off';}catch{$('sound').textContent='Sound unavailable';}};
 $('enter').onclick=()=>{started=true;$('intro').classList.add('hidden');$('hud').classList.add('visible');$('touch').classList.add('visible');$('enter').blur();message('Take your time. The forest will wait.');};
-function setPaused(value){paused=value;keys.clear();$('pause').textContent=paused?'Resume':'Pause';if(audio)audio.gain.gain.setTargetAtTime(paused?0:.12,audio.context.currentTime,.2);}
+function setPaused(value){paused=value;keys.clear();stopOrbit();$('pause').textContent=paused?'Resume':'Pause';if(audio)audio.gain.gain.setTargetAtTime(paused?0:.12,audio.context.currentTime,.2);}
 $('pause').onclick=()=>setPaused(!paused);
 $('helpButton').onclick=()=>{setPaused(true);$('help').classList.add('open');$('closeHelp').focus();};
 $('closeHelp').onclick=()=>{$('help').classList.remove('open');setPaused(false);};
+// Pointer capture keeps RMB drag active outside the canvas; release and interruptions
+// always restore the cursor. No Pointer Lock permission or network dependency is needed.
+function stopOrbit(){
+ const id=orbit.pointerId;orbit.active=false;orbit.pointerId=null;canvas.style.cursor='';
+ if(id!==null&&canvas.hasPointerCapture(id))canvas.releasePointerCapture(id);
+}
+canvas.addEventListener('contextmenu',e=>{if(started)e.preventDefault();});
+canvas.addEventListener('pointerdown',e=>{
+ if(e.button!==2||!started||paused)return;
+ e.preventDefault();orbit.active=true;orbit.pointerId=e.pointerId;orbit.x=e.clientX;orbit.y=e.clientY;
+ camera.yaw=camera.a;camera.elevation=camera.pitch;
+ if(document.activeElement instanceof HTMLElement)document.activeElement.blur();
+ canvas.setPointerCapture(e.pointerId);canvas.style.cursor='grabbing';
+});
+canvas.addEventListener('pointermove',e=>{
+ if(!orbit.active||e.pointerId!==orbit.pointerId||paused)return;
+ if(!(e.buttons&2)){stopOrbit();return;}
+ camera.yaw+=(e.clientX-orbit.x)*.005;
+ camera.elevation=clamp(camera.elevation+(e.clientY-orbit.y)*.004,.035,1.12);
+ orbit.x=e.clientX;orbit.y=e.clientY;
+});
+canvas.addEventListener('pointerup',e=>{if(e.button===2&&e.pointerId===orbit.pointerId)stopOrbit();});
+for(const event of ['pointercancel','lostpointercapture'])canvas.addEventListener(event,stopOrbit);
+canvas.addEventListener('wheel',e=>{if(started&&!paused){e.preventDefault();camera.zoom=clamp(camera.zoom+e.deltaY*.008,4.2,13);}}, {passive:false});
 addEventListener('keydown',e=>{const k=e.key.toLowerCase();if(['arrowup','arrowdown','arrowleft','arrowright',' '].includes(k)&&!['BUTTON','INPUT'].includes(e.target.tagName))e.preventDefault();if(k==='escape'&&started){if($('help').classList.contains('open'))$('closeHelp').click();else setPaused(!paused);return;}if(['BUTTON','INPUT'].includes(e.target.tagName)&&k===' ')return;keys.add(k);if(k===' '&&!e.repeat)leap();});
 addEventListener('keyup',e=>keys.delete(e.key.toLowerCase()));addEventListener('blur',()=>{keys.clear();if(started)setPaused(true);});document.addEventListener('visibilitychange',()=>{if(document.hidden&&started)setPaused(true);last=performance.now();});
 for(const b of document.querySelectorAll('[data-key]')){b.addEventListener('pointerdown',e=>{e.preventDefault();b.setPointerCapture(e.pointerId);keys.add(b.dataset.key);if(b.dataset.key===' ')leap();});for(const evt of ['pointerup','pointercancel','lostpointercapture'])b.addEventListener(evt,()=>keys.delete(b.dataset.key));}
 // Read-only diagnostics for verifying the standalone artifact.
-window.rainbowFox={get state(){return {started,paused,x:fox.x,z:fox.z,speed:fox.speed,jump:fox.jump,discoveries,particles:dots.length};}};
+window.rainbowFox={get state(){return {started,paused,x:fox.x,z:fox.z,speed:fox.speed,jump:fox.jump,heading:fox.a,gait:fox.gait,feet:feet.map(p=>[...p]),cameraYaw:camera.a,cameraPitch:camera.pitch,cameraDistance:camera.distance,orbiting:orbit.active,discoveries,particles:dots.length};}};
 requestAnimationFrame(frame);
 })();
 </script>
