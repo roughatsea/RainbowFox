@@ -13,7 +13,7 @@
 <div id="intro"><div class="card"><div class="eyebrow">A small journey through the dark</div><h1>Rainbow Fox</h1><div class="subtitle">The forest remembers every footstep.<br>Follow the lights. Leave a little of your own.</div><button class="enter" id="enter">Enter the forest</button><div class="instructions"><span class="desktop">WASD / ARROWS &nbsp; wander &nbsp; · &nbsp; SHIFT &nbsp; run &nbsp; · &nbsp; SPACE &nbsp; leap<br>RIGHT MOUSE + DRAG &nbsp; look around &nbsp; · &nbsp; WHEEL &nbsp; zoom<br></span>Headphones welcome. No destination required.</div></div></div>
 <div id="hud"><div class="brand">Rainbow Fox<small>A FOREST OF LIGHT</small></div><div class="controls"><button class="icon" id="sound" aria-pressed="false">Sound off</button><button class="icon" id="helpButton">Guide</button><button class="icon" id="pause">Pause</button></div><div class="message" id="message"></div><div class="bottom">WANDER FREELY &nbsp; / &nbsp; FOLLOW THE DRIFTING LIGHTS</div></div>
 <div id="touch"><div class="group"><button data-key="arrowleft" aria-label="Turn left">↶</button><button data-key="arrowup" aria-label="Walk forward">↑</button><button data-key="arrowright" aria-label="Turn right">↷</button></div><div class="group"><button data-key="shift" aria-label="Run">Run</button><button data-key=" " aria-label="Leap">✧</button></div></div>
-<div id="help"><div class="card"><div class="eyebrow">Find your own pace</div><h2>Nothing is chasing you.</h2><p>W / ↑ moves forward. S / ↓ steps back.<br>A / ← and D / → turn through the forest.<br>Right mouse + drag orbits the camera. Wheel zooms.<br>While holding right mouse, W follows the camera<br>and A / D move sideways.<br>Hold Shift to run. Press Space to leap.<br>Escape pauses. Sound is optional.</p><p>Approach the little clusters of floating lights.<br>They will remember you, then drift away.</p><button class="enter" id="closeHelp">Return to the trees</button></div></div>
+<div id="help"><div class="card"><div class="eyebrow">Find your own pace</div><h2>Nothing is chasing you.</h2><p>W / ↑ moves forward. S / ↓ steps back.<br>A / ← and D / → turn through the forest.<br>Right mouse + drag orbits the camera. Wheel zooms.<br>The camera moves independently of the fox.<br>W / S keep her direction; A / D turn her body.<br>Hold Shift to run. Press Space to leap.<br>Escape pauses. Sound is optional.</p><p>Approach the little clusters of floating lights.<br>They will remember you, then drift away.</p><button class="enter" id="closeHelp">Return to the trees</button></div></div>
 <script>
 'use strict';
 (() => {
@@ -22,7 +22,7 @@ const $=id=>document.getElementById(id);
 const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
 let W=innerWidth,H=innerHeight,dpr=1,started=false,paused=false,last=0,t=0;
 const keys=new Set();
-const fox={x:0,z:0,a:0,speed:0,jump:0,vy:0,turn:0,vx:0,vz:0,gait:0,activity:0,landing:0};
+const fox={x:0,z:0,a:0,speed:0,jump:0,vy:0,turn:0,vx:0,vz:0,gait:0,activity:0,landing:0,pivot:0};
 const camera={x:0,z:-8,y:3,a:0,pitch:.24,yaw:0,elevation:.24,distance:8,zoom:8,focusX:0,focusZ:0,focusY:1};
 const orbit={active:false,pointerId:null,x:0,y:0};
 const TAU=Math.PI*2;
@@ -104,6 +104,48 @@ for(let i=0;i<100;i++){const u=rand(),a=rand()*TAU;limb.push([Math.cos(a),Math.s
 ellipsoid('paw',0,.065,.035,.082,.065,.135,55,3);
 const pose={bob:0,pitch:0,roll:0,neck:0,headYaw:0};
 const feet=[];
+// Pivot steps keep grounded paws anchored in the world while the torso turns.
+const pivotFeet=[];
+const stepOrder=[0,3,2,1];
+let pivotActive=false,pivotNext=0;
+function pawWorld(x,z,heading=fox.a){return [fox.x+x*Math.cos(heading)+z*Math.sin(heading),fox.z+z*Math.cos(heading)-x*Math.sin(heading)];}
+function pawLocal(x,z){const dx=x-fox.x,dz=z-fox.z;return [dx*Math.cos(fox.a)-dz*Math.sin(fox.a),dx*Math.sin(fox.a)+dz*Math.cos(fox.a)];}
+function updatePivot(dt,speed){
+ const turning=Math.abs(fox.turn)>.06&&speed<.65&&fox.jump===0&&started;
+ if(turning&&!pivotActive){
+  if(fox.pivot<.01){
+   pivotFeet.length=0;
+   for(const side of [-1,1])for(const front of [true,false]){
+    const x=side*(front?.225:.235),z=front?.48:-.54;
+    const world=pawWorld(x,z);pivotFeet.push({baseX:x,baseZ:z,x:world[0],z:world[1],y:.08,progress:1});
+   }
+   pivotNext=0;
+  }
+  pivotActive=true;
+ }
+ if(speed>.8||fox.jump>0)pivotActive=false;
+ for(const paw of pivotFeet){
+  if(paw.progress>=1)continue;
+  paw.progress=Math.min(1,paw.progress+dt/.19);
+  const u=paw.progress,ease=u*u*(3-2*u);
+  paw.x=mix(paw.startX,paw.goalX,ease);paw.z=mix(paw.startZ,paw.goalZ,ease);
+  paw.y=.08+Math.sin(Math.PI*u)*.14;
+ }
+ if(pivotActive&&!pivotFeet.some(paw=>paw.progress<1)){
+  let next=-1;
+  for(let i=0;i<4;i++){
+   const slot=(pivotNext+i)%4,index=stepOrder[slot],paw=pivotFeet[index];
+   const goal=pawWorld(paw.baseX,paw.baseZ);
+   if(Math.hypot(goal[0]-paw.x,goal[1]-paw.z)>(turning?.12:.025)){next=index;pivotNext=(slot+1)%4;break;}
+  }
+  if(next>=0){
+   const paw=pivotFeet[next],goal=pawWorld(paw.baseX,paw.baseZ,fox.a+fox.turn*.16);
+   paw.startX=paw.x;paw.startZ=paw.z;paw.goalX=goal[0];paw.goalZ=goal[1];paw.progress=0;
+  }else if(!turning)pivotActive=false;
+ }
+ fox.pivot+=((pivotActive?1:0)-fox.pivot)*(1-Math.exp(-dt*14));
+}
+
 function resize(){W=innerWidth;H=innerHeight;dpr=Math.min(devicePixelRatio||1,1.5);canvas.width=Math.round(W*dpr);canvas.height=Math.round(H*dpr);ctx.setTransform(dpr,0,0,dpr,0,0);focal=Math.min(W,H)*.97;horizon=H*.53;}
 addEventListener('resize',resize);resize();
 function wrap(v,center){return center+((v-center+radius)%(radius*2)+radius*2)%(radius*2)-radius;}
@@ -161,7 +203,11 @@ function footPose(side,front,run){
  else {const u=(phase-duty)/(1-duty);z=mix(-span*.5,span*.5,u);y=Math.sin(Math.PI*u)*mix(.15,.29,run)*moving;}
  const rootZ=front?.48:-.54;
  if(fox.jump>0){const tuck=clamp(fox.vy/5+.45,0,1);z=(front?-.24:.24)*tuck;y=.17+tuck*.27;}
- return [side*(front?.225:.235)+z*lateral,.08+y,rootZ+z*(fox.jump>0?1:longitudinal)];
+ const walking=[side*(front?.225:.235)+z*lateral,.08+y,rootZ+z*(fox.jump>0?1:longitudinal)];
+ const index=(side<0?0:2)+(front?0:1),paw=pivotFeet[index];
+ if(!paw||fox.pivot<.001)return walking;
+ const planted=pawLocal(paw.x,paw.z);
+ return [mix(walking[0],planted[0],fox.pivot),mix(walking[1],paw.y,fox.pivot),mix(walking[2],planted[1],fox.pivot)];
 }
 function drawFox(){
  const run=clamp((Math.hypot(fox.vx,fox.vz)-3.5)/3.5,0,1),cycle=fox.gait*TAU;
@@ -169,6 +215,12 @@ function drawFox(){
  pose.bob=breathe+fox.activity*mix(Math.cos(cycle*2)*.019,Math.sin(cycle)*.065,run)-fox.landing*.065;
  pose.pitch=fox.activity*run*Math.cos(cycle)*.075+clamp(fox.vy*.018,-.1,.1);
  pose.roll=clamp(-fox.turn*Math.abs(fox.speed)*.016,-.14,.14);
+ const lifting=pivotFeet.find(paw=>paw.progress<1);
+ if(lifting&&fox.pivot>.01){
+  // Shift weight over the supporting legs, then settle as the lifted paw lands.
+  const weight=Math.sin(lifting.progress*Math.PI)*fox.pivot;
+  pose.bob+=weight*.018;pose.roll-=Math.sign(lifting.baseX)*weight*.028;
+ }
  pose.neck=pose.bob*.35;
  pose.headYaw=clamp(fox.turn*.09,-.15,.15)+Math.sin(t*.6)*.045*(1-fox.activity);
  drawPart('body');
@@ -209,20 +261,14 @@ function update(dt){
  t+=dt;
  const forward=keys.has('w')||keys.has('arrowup'),back=keys.has('s')||keys.has('arrowdown');
  const turning=(keys.has('a')||keys.has('arrowleft')?-1:0)+(keys.has('d')||keys.has('arrowright')?1:0);
- const oldAngle=fox.a;
- if(orbit.active){
-  if(forward||back||turning)fox.a+=angleDelta(camera.yaw,fox.a)*(1-Math.exp(-dt*12));
- }else fox.a+=turning*dt*(1.35+Math.abs(fox.speed)*.035);
- fox.turn+=(angleDelta(fox.a,oldAngle)/dt-fox.turn)*(1-Math.exp(-dt*7));
+ // Keyboard heading is independent of the camera, including during RMB orbit.
+ const turnRate=started?turning*(1.1+Math.abs(fox.speed)*.055):0;
+ fox.turn+=(turnRate-fox.turn)*(1-Math.exp(-dt*8));
+ fox.a+=fox.turn*dt;
  const pace=keys.has('shift')?8.2:3.1;
  const target=started?(forward?pace:back?-2.1:0):0;
  fox.speed+=(target-fox.speed)*(1-Math.exp(-dt*4.5));
- let dx=Math.sin(fox.a)*fox.speed,dz=Math.cos(fox.a)*fox.speed;
- if(orbit.active&&turning&&started){
-  // RMB converts A/D to camera-relative strafing, including diagonal movement.
-  const strafe=turning*pace*.8,normal=forward||back?Math.SQRT1_2:1;
-  dx=(dx+Math.cos(camera.yaw)*strafe)*normal;dz=(dz-Math.sin(camera.yaw)*strafe)*normal;
- }
+ const dx=Math.sin(fox.a)*fox.speed,dz=Math.cos(fox.a)*fox.speed;
  fox.vx+=(dx-fox.vx)*(1-Math.exp(-dt*12));fox.vz+=(dz-fox.vz)*(1-Math.exp(-dt*12));
  const oldX=fox.x,oldZ=fox.z;
  fox.x+=fox.vx*dt;fox.z+=fox.vz*dt;
@@ -234,6 +280,7 @@ function update(dt){
  if(fox.jump===0)fox.gait=(fox.gait+moved/mix(1.35,2.15,run))%1;
  fox.landing*=Math.exp(-dt*10);
  if(fox.jump>0||fox.vy>0){fox.vy-=dt*12;fox.jump=Math.max(0,fox.jump+fox.vy*dt);if(fox.jump===0){fox.vy=0;fox.landing=1;}}
+ updatePivot(dt,actualSpeed);
  const lag=1-Math.exp(-dt*6);
  // An idle orbit stays where you leave it; walking normally restores the chase view.
  if(!orbit.active&&(actualSpeed>.15||turning))camera.yaw+=angleDelta(fox.a,camera.yaw)*(1-Math.exp(-dt*3));
@@ -316,7 +363,7 @@ addEventListener('keydown',e=>{const k=e.key.toLowerCase();if(['arrowup','arrowd
 addEventListener('keyup',e=>keys.delete(e.key.toLowerCase()));addEventListener('blur',()=>{keys.clear();if(started)setPaused(true);});document.addEventListener('visibilitychange',()=>{if(document.hidden&&started)setPaused(true);last=performance.now();});
 for(const b of document.querySelectorAll('[data-key]')){b.addEventListener('pointerdown',e=>{e.preventDefault();b.setPointerCapture(e.pointerId);keys.add(b.dataset.key);if(b.dataset.key===' ')leap();});for(const evt of ['pointerup','pointercancel','lostpointercapture'])b.addEventListener(evt,()=>keys.delete(b.dataset.key));}
 // Read-only diagnostics for verifying the standalone artifact.
-window.rainbowFox={get state(){return {started,paused,x:fox.x,z:fox.z,speed:fox.speed,jump:fox.jump,heading:fox.a,gait:fox.gait,feet:feet.map(p=>[...p]),cameraYaw:camera.a,cameraPitch:camera.pitch,cameraDistance:camera.distance,orbiting:orbit.active,discoveries,particles:dots.length};}};
+window.rainbowFox={get state(){return {started,paused,x:fox.x,z:fox.z,speed:fox.speed,jump:fox.jump,heading:fox.a,gait:fox.gait,pivot:fox.pivot,pivotActive,feet:feet.map(p=>[...p]),cameraYaw:camera.a,cameraPitch:camera.pitch,cameraDistance:camera.distance,orbiting:orbit.active,discoveries,particles:dots.length};}};
 requestAnimationFrame(frame);
 })();
 </script>

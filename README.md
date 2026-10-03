@@ -13,14 +13,14 @@ No terminal, installation, server, internet connection, or account is required. 
 - **A / ←, D / →:** turn
 - **Right mouse + drag:** orbit the camera horizontally and vertically
 - **Mouse wheel:** zoom in or out
-- **Right mouse + W / S:** move along the camera heading
-- **Right mouse + A / D:** strafe (combine with W / S for diagonal movement)
 - **Shift:** run
 - **Space:** leap
 - **Escape:** pause or resume
 - **Sound:** toggle the ambient drone, wind, and light chimes (off initially)
 
-The forest wraps endlessly. Floating light clusters respond when you approach. The camera follows behind the fox. Hold the right mouse button and drag to look around her; she stays facing the same way while idle, and follows the camera heading when you move. Release the button to return to ordinary keyboard turning. An idle camera keeps its angle; walking eases it back behind her. Vertical orbit and zoom are limited to keep her in view. Releasing the button, opening the guide, pausing, or switching windows ends camera drag. Switching away pauses the experience.
+The forest wraps endlessly. Floating light clusters respond when you approach. Hold the right mouse button and drag to orbit independently of the fox: W / S continue along her heading, and A / D turn her body. You can hold W + Shift and orbit to her profile to watch her gallop from the side. When she is still, A / D make her lift and reposition her paws as she turns, keeping supporting paws planted and shifting her weight between steps. She finishes setting down her paws when you release the turn key.
+
+An idle camera keeps its angle; after you release right mouse, walking eases it back behind her. Vertical orbit and zoom are limited to keep her in view. Releasing the mouse button, opening the guide, pausing, or switching windows ends camera drag. Switching away pauses the experience.
 
 ## Development
 
