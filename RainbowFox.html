@@ -1,0 +1,163 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Rainbow Fox · A forest of light</title>
+<style>
+:root{color-scheme:dark;font-family:Georgia,'Times New Roman',serif;color:#eee7f4;background:#000}*{box-sizing:border-box}body{margin:0;overflow:hidden}canvas{display:block;width:100vw;height:100vh;touch-action:none}button{font:inherit;color:inherit;cursor:pointer}#intro{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:linear-gradient(90deg,rgba(0,0,0,.76),rgba(0,0,0,.45));transition:opacity 1.2s;z-index:3}#intro.hidden{opacity:0;pointer-events:none}.card{width:min(570px,90vw);text-align:center;padding:32px}.eyebrow{font:10px system-ui,sans-serif;letter-spacing:5px;text-transform:uppercase;color:#b7abce}h1{font-weight:normal;font-size:clamp(52px,9vw,92px);line-height:1;letter-spacing:-3px;margin:25px 0;background:linear-gradient(100deg,#edba94,#efd9fa,#9edede);-webkit-background-clip:text;background-clip:text;color:transparent}.subtitle{font-style:italic;font-size:19px;color:#c4bacb;line-height:1.7}.enter{margin:26px 0 22px;padding:15px 35px;border:1px solid #8f7d9e80;border-radius:40px;background:#21192865;letter-spacing:3px;font:11px system-ui,sans-serif;text-transform:uppercase;transition:background .3s}.enter:hover,.enter:focus-visible{background:#5b3a6865;outline:1px solid #e1c5ef}.instructions{font:11px system-ui,sans-serif;line-height:2;color:#aaa0b5;letter-spacing:.5px}#hud{position:fixed;inset:0;pointer-events:none;opacity:0;transition:opacity 1s}#hud.visible{opacity:1}.brand{position:absolute;left:32px;top:28px;font-size:20px;letter-spacing:1px;color:#d9c9e7}.brand small{display:block;font:8px system-ui,sans-serif;letter-spacing:3px;margin-top:9px;color:#8b829b}.controls{position:absolute;right:24px;top:22px;display:flex;gap:8px;pointer-events:auto}.icon{border:1px solid #79708450;background:#0c0a1280;border-radius:22px;padding:10px 14px;font:10px system-ui,sans-serif;letter-spacing:1px}.icon:hover{background:#302039}.bottom{position:absolute;bottom:28px;left:0;right:0;text-align:center;font:10px system-ui,sans-serif;letter-spacing:2px;color:#8d839e}.message{position:absolute;top:20%;left:0;right:0;text-align:center;font-style:italic;font-size:19px;color:#d8c8e4;opacity:0;transition:opacity 2s;text-shadow:0 0 20px #b688d8}.message.show{opacity:1}#touch{position:fixed;bottom:65px;left:20px;right:20px;display:none;justify-content:space-between;pointer-events:none}#touch button{pointer-events:auto;touch-action:none;border:1px solid #a38ab544;background:#15102199;border-radius:50%;width:56px;height:56px;font:19px system-ui;color:#d2bfdc}#touch .group{display:flex;gap:10px}#help{position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:#000b;z-index:4}#help.open{display:flex}#help .card{background:#0d0913;border:1px solid #59436a;border-radius:18px}#help h2{font-weight:normal;font-size:32px}#help p{font:14px system-ui;line-height:2;color:#c5b5d2}@media(pointer:coarse){#touch.visible{display:flex}.bottom{font-size:8px;bottom:20px}.brand{left:20px;top:22px}.controls{right:12px}.instructions .desktop{display:none}}@media(prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<canvas id="forest" aria-label="A third-person neon forest. Control a luminous fox with arrow keys or WASD; Shift to run, Space to leap." role="img"></canvas>
+<div id="intro"><div class="card"><div class="eyebrow">A small journey through the dark</div><h1>Rainbow Fox</h1><div class="subtitle">The forest remembers every footstep.<br>Follow the lights. Leave a little of your own.</div><button class="enter" id="enter">Enter the forest</button><div class="instructions"><span class="desktop">WASD / ARROWS &nbsp; wander &nbsp; · &nbsp; SHIFT &nbsp; run &nbsp; · &nbsp; SPACE &nbsp; leap<br></span>Headphones welcome. No destination required.</div></div></div>
+<div id="hud"><div class="brand">Rainbow Fox<small>A FOREST OF LIGHT</small></div><div class="controls"><button class="icon" id="sound" aria-pressed="false">Sound off</button><button class="icon" id="helpButton">Guide</button><button class="icon" id="pause">Pause</button></div><div class="message" id="message"></div><div class="bottom">WANDER FREELY &nbsp; / &nbsp; FOLLOW THE DRIFTING LIGHTS</div></div>
+<div id="touch"><div class="group"><button data-key="arrowleft" aria-label="Turn left">↶</button><button data-key="arrowup" aria-label="Walk forward">↑</button><button data-key="arrowright" aria-label="Turn right">↷</button></div><div class="group"><button data-key="shift" aria-label="Run">Run</button><button data-key=" " aria-label="Leap">✧</button></div></div>
+<div id="help"><div class="card"><div class="eyebrow">Find your own pace</div><h2>Nothing is chasing you.</h2><p>W / ↑ moves forward. S / ↓ steps back.<br>A / ← and D / → turn through the forest.<br>Hold Shift to run. Press Space to leap.<br>Escape pauses. Sound is optional.</p><p>Approach the little clusters of floating lights.<br>They will remember you, then drift away.</p><button class="enter" id="closeHelp">Return to the trees</button></div></div>
+<script>
+'use strict';
+(() => {
+const canvas=document.getElementById('forest'),ctx=canvas.getContext('2d',{alpha:false});
+const $=id=>document.getElementById(id);
+const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
+let W=innerWidth,H=innerHeight,dpr=1,started=false,paused=false,last=0,t=0,steps=0;
+const keys=new Set();
+const fox={x:0,z:0,a:0,speed:0,jump:0,vy:0};
+const camera={x:0,z:-9,y:3.6,a:0};
+let focal=700,horizon=0,camSin=0,camCos=1;
+let seed=8128;const rand=()=>{seed=(seed*1664525+1013904223)>>>0;return seed/4294967296};
+const colors=['#ff577d','#ff9852','#ffe477','#7fffad','#53e4ed','#7e9bff','#cf8cff'];
+const trees=[],ground=[],wisps=[],trails=[];
+const radius=95;
+// Deterministic particle silhouettes: lit bark, spreading boughs and open crowns.
+for(let n=0;n<100;n++){
+ let x=(rand()-.5)*radius*2,z=(rand()-.5)*radius*2;
+ if(Math.abs(x)<4&&z>-12&&z<28)x+=(x<0?-1:1)*7;
+ if(n<20){x=(n%2?1:-1)*(5+rand()*9);z=-7+Math.floor(n/2)*7;}
+ const height=7+rand()*10,base=rand()*7,points=[];
+ for(let i=0;i<200;i++){
+  const y=rand()*height,angle=rand()*Math.PI*2,r=.14+rand()*.24;
+  points.push([Math.cos(angle)*r,y,Math.sin(angle)*r,Math.floor((base+y*.2)%7),.45+rand()*.65]);
+ }
+ for(let i=0;i<340;i++){
+  const u=rand(),y=height*(.43+u*.57),angle=rand()*Math.PI*2;
+  const r=(1-u)*3.8*(.3+Math.sqrt(rand())*.7)+.2;
+  points.push([Math.cos(angle)*r,y,Math.sin(angle)*r,Math.floor((base+u*3+rand())%7),.4+rand()*.8]);
+ }
+ for(let branch=0;branch<5;branch++){
+  const a=rand()*6.28,by=height*(.35+rand()*.35);
+  for(let i=0;i<26;i++){const u=i/26;points.push([Math.cos(a)*u*2.7,by+u*2,Math.sin(a)*u*2.7,Math.floor((base+u*2)%7),.6]);}
+ }
+ trees.push({x,z,points,height});
+}
+for(let i=0;i<2200;i++)ground.push({x:(rand()-.5)*radius*2,z:(rand()-.5)*radius*2,y:rand()*.08,c:Math.floor(rand()*7),s:.5+rand()});
+for(let i=0;i<18;i++)wisps.push({x:(rand()-.5)*130,z:8+rand()*145,y:1.1+rand()*2.4,phase:rand()*6.28,found:false,c:i%7});
+wisps[0].x=0;wisps[0].z=14;wisps[1].x=1;wisps[1].z=34;wisps[2].x=-2;wisps[2].z=57;
+// A dense warm fox silhouette built from small points rather than a solid mesh.
+const fur=[];
+function ellipsoid(cx,cy,cz,rx,ry,rz,count,shade){
+ for(let i=0;i<count;i++){
+  const a=rand()*6.283,v=rand()*2-1,r=Math.sqrt(1-v*v);
+  fur.push([cx+rx*r*Math.cos(a),cy+ry*v,cz+rz*r*Math.sin(a),shade,rand()*.6+.5]);
+ }
+}
+ellipsoid(0,.88,0,.32,.35,.73,430,0);
+ellipsoid(0,1.13,.56,.26,.31,.32,160,0);
+ellipsoid(0,1.23,.84,.21,.23,.32,160,1);
+ellipsoid(0,1.14,1.08,.13,.12,.28,110,1);
+ellipsoid(0,1.11,1.34,.065,.065,.055,24,3);
+for(const side of [-1,1])for(let i=0;i<95;i++){
+ const u=rand(),width=(1-u)*.13;
+ fur.push([side*.17+(rand()-.5)*width*2,1.4+u*.43,.72+(rand()-.5)*width*1.8,2,.7]);
+}
+// The tail and legs are animated separately.
+const tail=[];for(let i=0;i<350;i++){const u=rand(),a=rand()*6.28,r=Math.sin(u*Math.PI)*.26;tail.push([Math.cos(a)*r,Math.sin(a)*r,u,u>.72?1:0,.5+rand()*.6]);}
+const furColors=['#ffb76f','#ffe5bf','#ff9c87','#654662','#baf7ff'];
+function resize(){W=innerWidth;H=innerHeight;dpr=Math.min(devicePixelRatio||1,1.5);canvas.width=Math.round(W*dpr);canvas.height=Math.round(H*dpr);ctx.setTransform(dpr,0,0,dpr,0,0);focal=Math.min(W,H)*.97;horizon=H*.40;}
+addEventListener('resize',resize);resize();
+function wrap(v,center){return center+((v-center+radius)%(radius*2)+radius*2)%(radius*2)-radius;}
+function project(x,y,z){const dx=x-camera.x,dz=z-camera.z;const depth=dx*camSin+dz*camCos; if(depth<.5||depth>100)return null;const side=dx*camCos-dz*camSin;return [W*.5+side*focal/depth,horizon+(camera.y-y)*focal/depth,depth];}
+const dots=[];
+function dot(x,y,z,c,size,alpha=1){const p=project(x,y,z);if(!p||p[0]<-25||p[0]>W+25||p[1]<-25||p[1]>H+25)return;dots.push([p[0],p[1],p[2],c,Math.min(5,size*focal/p[2]),alpha]);}
+function foxDot(x,y,z,c,s){const sa=Math.sin(fox.a),ca=Math.cos(fox.a);dot(fox.x+x*ca+z*sa,y+fox.jump,fox.z+z*ca-x*sa,furColors[c],s,.57);}
+function drawFox(){
+ const cycle=steps*2.7,bob=Math.sin(cycle*2)*Math.min(Math.abs(fox.speed)*.008,.07);
+ for(const p of fur)foxDot(p[0],p[1]+bob,p[2],p[3],.006+p[4]*.006);
+ for(const p of tail){const u=p[2],sway=Math.sin(t*2.8-u*2)*(.42+Math.abs(fox.speed)*.022);foxDot(p[0]+sway*u,.82+p[1]+u*.15+Math.sin(t*3-u)*.07,-.58-u*1.45,p[3],.017*p[4]);}
+ for(const side of [-1,1])for(const front of [-1,1]){
+  const stride=Math.sin(cycle+(side*front>0?0:Math.PI))*Math.min(Math.abs(fox.speed)*.07,.46),lift=Math.max(0,Math.cos(cycle+(side*front>0?0:Math.PI)))*Math.min(Math.abs(fox.speed)*.028,.17);
+  for(let j=0;j<30;j++){const u=j/30;foxDot(side*.24+Math.sin(j*4)*.025,.72*(1-u)+.1+lift*u,front*.48+stride*u,j>22?2:0,.018);}
+ }
+ foxDot(-.19,1.3,.99,4,.04);foxDot(.19,1.3,.99,4,.04);
+}
+let messageUntil=0,messageIndex=0,discoveries=0;
+const messages=['Let the dark make room for you.','Some lights are only passing through.','Even here, you are not alone.','The trees keep your little secrets.','There is no hurry to arrive.'];
+function message(text){$('message').textContent=text;$('message').classList.add('show');messageUntil=t+7;}
+function leap(){if(started&&!paused&&fox.jump===0){fox.vy=5.1;if(audio)chime(640,.09);}}
+function update(dt){
+ t+=dt;
+ const forward=keys.has('w')||keys.has('arrowup'),back=keys.has('s')||keys.has('arrowdown');
+ const turning=(keys.has('a')||keys.has('arrowleft')? -1:0)+(keys.has('d')||keys.has('arrowright')?1:0);
+ fox.a+=turning*dt*(1.35+Math.abs(fox.speed)*.035);
+ const target=started?(forward?(keys.has('shift')?10:4.3):(back?-2.4:0)):0;
+ fox.speed+=(target-fox.speed)*(1-Math.exp(-dt*3.5));
+ fox.x+=Math.sin(fox.a)*fox.speed*dt;fox.z+=Math.cos(fox.a)*fox.speed*dt;steps+=Math.abs(fox.speed)*dt;
+ // Soft collision gently slides the fox around trunks.
+ for(const tree of trees){const x=wrap(tree.x,fox.x),z=wrap(tree.z,fox.z),dx=fox.x-x,dz=fox.z-z,d=Math.hypot(dx,dz);if(d<.85){const a=d>.001?Math.atan2(dx,dz):fox.a+Math.PI/2;fox.x=x+Math.sin(a)*.85;fox.z=z+Math.cos(a)*.85;}}
+ if(fox.jump>0||fox.vy>0){fox.vy-=dt*12;fox.jump=Math.max(0,fox.jump+fox.vy*dt);if(fox.jump===0)fox.vy=0;}
+ const lag=1-Math.exp(-dt*4);camera.a+=Math.atan2(Math.sin(fox.a-camera.a),Math.cos(fox.a-camera.a))*lag;
+ const distance=8.1+Math.abs(fox.speed)*.13;
+ camera.x+=(fox.x-Math.sin(camera.a)*distance+Math.cos(camera.a)*1.5-camera.x)*lag;camera.z+=(fox.z-Math.cos(camera.a)*distance-Math.sin(camera.a)*1.5-camera.z)*lag;
+ camera.y+=(4.1+Math.abs(fox.speed)*.035-camera.y)*lag;
+ if(started&&Math.abs(fox.speed)>.8&&rand()<dt*35){trails.push({x:fox.x+(rand()-.5)*.5,y:.1,z:fox.z-.3,life:1,c:colors[Math.floor(rand()*7)]});}
+ for(let i=trails.length-1;i>=0;i--){trails[i].life-=dt*.45;trails[i].y+=dt*.13;if(trails[i].life<=0)trails.splice(i,1);}
+ for(const w of wisps){const x=wrap(w.x,fox.x),z=wrap(w.z,fox.z);if(started&&!w.found&&Math.hypot(x-fox.x,z-fox.z)<3.5){w.found=true;w.when=t;discoveries++;message(messages[messageIndex++%messages.length]);if(audio){chime(440+70*w.c,.35);setTimeout(()=>{if(audio&&!paused)chime(660+100*w.c,.5);},220);}}if(w.found&&t-w.when>35){w.found=false;w.x=fox.x+(rand()-.5)*100;w.z=fox.z+(rand()-.5)*100;}}
+ if(t>messageUntil)$('message').classList.remove('show');
+ if(audio)audio.gain.gain.setTargetAtTime(paused?0:.12+Math.abs(fox.speed)*.005,audio.context.currentTime,.3);
+}
+function render(){
+ ctx.fillStyle='#000';ctx.fillRect(0,0,W,H);camSin=Math.sin(camera.a);camCos=Math.cos(camera.a);dots.length=0;
+ // Fine pools of color are atmospheric light, not visible solid ground.
+ const haze=ctx.createRadialGradient(W*.5,H*.5,0,W*.5,H*.5,Math.max(W,H)*.6);haze.addColorStop(0,'#100a1a');haze.addColorStop(.6,'#030408');haze.addColorStop(1,'#000');ctx.fillStyle=haze;ctx.fillRect(0,0,W,H);
+ for(const g of ground){const x=wrap(g.x,fox.x),z=wrap(g.z,fox.z);dot(x,g.y,z,colors[g.c],.037*g.s,.72);}
+ for(const tree of trees){const x=wrap(tree.x,fox.x),z=wrap(tree.z,fox.z);const center=project(x,tree.height*.5,z);if(!center||center[0]<-W*.45||center[0]>W*1.45)continue;
+  const dist=Math.hypot(x-camera.x,z-camera.z);if(dist>87)continue;
+  const alpha=Math.max(.08,1-dist/100);
+  for(const p of tree.points)dot(x+p[0],p[1],z+p[2],colors[p[3]],.06*p[4],alpha);
+ }
+ for(const w of wisps){const x=wrap(w.x,fox.x),z=wrap(w.z,fox.z),age=w.found?t-w.when:0;
+  const y=w.y+Math.sin(t*.7+w.phase)*.3+(w.found?Math.min(age*.3,5):0),a=w.found?Math.max(0,1-age/8):.85;
+  for(let j=0;j<14;j++){const phase=w.phase+j*2.4+t*.4,r=.2+(j%3)*.12;dot(x+Math.sin(phase)*r,y+Math.cos(phase*1.3)*r,z+Math.cos(phase)*r,colors[(w.c+j)%7],j===0?.085:.026,a);}
+ }
+ // Sparse airborne motes drift through the depth of the scene.
+ for(let i=0;i<110;i++){const a=i*2.399;dot(fox.x+Math.sin(a)*((i%19)+2),.4+(i%13)*.44+Math.sin(t*.5+i)*.22,fox.z+Math.cos(a)*((i%29)+3),colors[i%7],.015,.35+Math.sin(t+i)*.15);}
+ for(const p of trails)dot(p.x,p.y,p.z,p.c,.023,p.life*.75);
+ drawFox();dots.sort((a,b)=>b[2]-a[2]);
+ ctx.globalCompositeOperation='lighter';
+ for(const p of dots){const fade=Math.max(0,1-p[2]/100)*p[5];if(fade<.01)continue;ctx.globalAlpha=fade;ctx.fillStyle=p[3];const r=Math.max(.75,p[4]);ctx.beginPath();ctx.arc(p[0],p[1],r,0,Math.PI*2);ctx.fill();if(r>1.2){ctx.globalAlpha=fade*.08;ctx.beginPath();ctx.arc(p[0],p[1],r*4,0,Math.PI*2);ctx.fill();}}
+ ctx.globalAlpha=1;ctx.globalCompositeOperation='source-over';
+ const vignette=ctx.createRadialGradient(W*.5,H*.48,H*.15,W*.5,H*.48,Math.max(W,H)*.68);vignette.addColorStop(0,'#0000');vignette.addColorStop(1,'#000c');ctx.fillStyle=vignette;ctx.fillRect(0,0,W,H);
+}
+function frame(now){const dt=Math.min((now-last)/1000,.045)||.016;last=now;if(!paused&&!document.hidden)update(reduced?Math.min(dt,.03):dt);render();requestAnimationFrame(frame);}
+let audio=null;
+function initAudio(){const AC=window.AudioContext||window.webkitAudioContext;if(!AC)return false;const ac=new AC(),gain=ac.createGain();gain.gain.value=.12;gain.connect(ac.destination);
+ const oscillators=[];for(const [i,f] of [55,82.41,110,164.81,220].entries()){const osc=ac.createOscillator(),g=ac.createGain();osc.type='sine';osc.frequency.value=f;g.gain.value=i<3?.18:.035;osc.connect(g);g.connect(gain);osc.start();oscillators.push(osc);}
+ const buffer=ac.createBuffer(1,ac.sampleRate*4,ac.sampleRate),data=buffer.getChannelData(0);let brown=0;for(let i=0;i<data.length;i++){brown=(brown+(Math.random()*2-1)*.02)/1.02;data[i]=brown*2;}
+ const wind=ac.createBufferSource(),filter=ac.createBiquadFilter(),wg=ac.createGain();wind.buffer=buffer;wind.loop=true;filter.type='lowpass';filter.frequency.value=650;wg.gain.value=.3;wind.connect(filter);filter.connect(wg);wg.connect(gain);wind.start();audio={context:ac,gain,oscillators};return true;}
+function chime(f,duration){if(!audio)return;const ac=audio.context,osc=ac.createOscillator(),g=ac.createGain();osc.type='sine';osc.frequency.value=f;g.gain.setValueAtTime(0,ac.currentTime);g.gain.linearRampToValueAtTime(.22,ac.currentTime+.025);g.gain.exponentialRampToValueAtTime(.001,ac.currentTime+duration+1.5);osc.connect(g);g.connect(audio.gain);osc.start();osc.stop(ac.currentTime+duration+1.6);}
+$('sound').onclick=async()=>{try{if(!audio){if(!initAudio()){$('sound').textContent='Sound unavailable';return;}}const on=$('sound').getAttribute('aria-pressed')!=='true';if(on){await audio.context.resume();}else await audio.context.suspend();$('sound').setAttribute('aria-pressed',String(on));$('sound').textContent=on?'Sound on':'Sound off';}catch{$('sound').textContent='Sound unavailable';}};
+$('enter').onclick=()=>{started=true;$('intro').classList.add('hidden');$('hud').classList.add('visible');$('touch').classList.add('visible');$('enter').blur();message('Take your time. The forest will wait.');};
+function setPaused(value){paused=value;keys.clear();$('pause').textContent=paused?'Resume':'Pause';if(audio)audio.gain.gain.setTargetAtTime(paused?0:.12,audio.context.currentTime,.2);}
+$('pause').onclick=()=>setPaused(!paused);
+$('helpButton').onclick=()=>{setPaused(true);$('help').classList.add('open');$('closeHelp').focus();};
+$('closeHelp').onclick=()=>{$('help').classList.remove('open');setPaused(false);};
+addEventListener('keydown',e=>{const k=e.key.toLowerCase();if(['arrowup','arrowdown','arrowleft','arrowright',' '].includes(k)&&!['BUTTON','INPUT'].includes(e.target.tagName))e.preventDefault();if(k==='escape'&&started){if($('help').classList.contains('open'))$('closeHelp').click();else setPaused(!paused);return;}if(['BUTTON','INPUT'].includes(e.target.tagName)&&k===' ')return;keys.add(k);if(k===' '&&!e.repeat)leap();});
+addEventListener('keyup',e=>keys.delete(e.key.toLowerCase()));addEventListener('blur',()=>{keys.clear();if(started)setPaused(true);});document.addEventListener('visibilitychange',()=>{if(document.hidden&&started)setPaused(true);last=performance.now();});
+for(const b of document.querySelectorAll('[data-key]')){b.addEventListener('pointerdown',e=>{e.preventDefault();b.setPointerCapture(e.pointerId);keys.add(b.dataset.key);if(b.dataset.key===' ')leap();});for(const evt of ['pointerup','pointercancel','lostpointercapture'])b.addEventListener(evt,()=>keys.delete(b.dataset.key));}
+// Read-only diagnostics for verifying the standalone artifact.
+window.rainbowFox={get state(){return {started,paused,x:fox.x,z:fox.z,speed:fox.speed,jump:fox.jump,discoveries,particles:dots.length};}};
+requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>
