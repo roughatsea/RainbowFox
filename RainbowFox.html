@@ -3,17 +3,17 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Rainbow Fox · A forest of light</title>
+<title>Rainbow Fox · Between trees and stars</title>
 <style>
-:root{color-scheme:dark;font-family:Georgia,'Times New Roman',serif;color:#eee7f4;background:#000}*{box-sizing:border-box}body{margin:0;overflow:hidden}canvas{display:block;width:100vw;height:100vh;touch-action:none}button{font:inherit;color:inherit;cursor:pointer}#intro{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:linear-gradient(90deg,rgba(0,0,0,.76),rgba(0,0,0,.45));transition:opacity 1.2s;z-index:3}#intro.hidden{opacity:0;pointer-events:none}.card{width:min(570px,90vw);text-align:center;padding:32px}.eyebrow{font:10px system-ui,sans-serif;letter-spacing:5px;text-transform:uppercase;color:#b7abce}h1{font-weight:normal;font-size:clamp(52px,9vw,92px);line-height:1;letter-spacing:-3px;margin:25px 0;background:linear-gradient(100deg,#edba94,#efd9fa,#9edede);-webkit-background-clip:text;background-clip:text;color:transparent}.subtitle{font-style:italic;font-size:19px;color:#c4bacb;line-height:1.7}.enter{margin:26px 0 22px;padding:15px 35px;border:1px solid #8f7d9e80;border-radius:40px;background:#21192865;letter-spacing:3px;font:11px system-ui,sans-serif;text-transform:uppercase;transition:background .3s}.enter:hover,.enter:focus-visible{background:#5b3a6865;outline:1px solid #e1c5ef}.instructions{font:11px system-ui,sans-serif;line-height:2;color:#aaa0b5;letter-spacing:.5px}#hud{position:fixed;inset:0;pointer-events:none;opacity:0;transition:opacity 1s}#hud.visible{opacity:1}.brand{position:absolute;left:32px;top:28px;font-size:20px;letter-spacing:1px;color:#d9c9e7}.brand small{display:block;font:8px system-ui,sans-serif;letter-spacing:3px;margin-top:9px;color:#8b829b}.controls{position:absolute;right:24px;top:22px;display:flex;gap:8px;pointer-events:auto}.icon{border:1px solid #79708450;background:#0c0a1280;border-radius:22px;padding:10px 14px;font:10px system-ui,sans-serif;letter-spacing:1px}.icon:hover{background:#302039}.bottom{position:absolute;bottom:28px;left:0;right:0;text-align:center;font:10px system-ui,sans-serif;letter-spacing:2px;color:#8d839e}.message{position:absolute;top:20%;left:0;right:0;text-align:center;font-style:italic;font-size:19px;color:#d8c8e4;opacity:0;transition:opacity 2s;text-shadow:0 0 20px #b688d8}.message.show{opacity:1}#touch{position:fixed;bottom:65px;left:20px;right:20px;display:none;justify-content:space-between;pointer-events:none}#touch button{pointer-events:auto;touch-action:none;border:1px solid #a38ab544;background:#15102199;border-radius:50%;width:56px;height:56px;font:19px system-ui;color:#d2bfdc}#touch .group{display:flex;gap:10px}#help{position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:#000b;z-index:4}#help.open{display:flex}#help .card{background:#0d0913;border:1px solid #59436a;border-radius:18px}#help h2{font-weight:normal;font-size:32px}#help p{font:14px system-ui;line-height:2;color:#c5b5d2}@media(pointer:coarse){#touch.visible{display:flex}.bottom{font-size:8px;bottom:20px}.brand{left:20px;top:22px}.controls{right:12px}.instructions .desktop{display:none}}@media(prefers-reduced-motion:reduce){*{transition:none!important}}
+:root{color-scheme:dark;font-family:Georgia,'Times New Roman',serif;color:#eee7f4;background:#000}*{box-sizing:border-box}body{margin:0;overflow:hidden}canvas{display:block;width:100vw;height:100vh;touch-action:none}button{font:inherit;color:inherit;cursor:pointer}#intro{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:linear-gradient(90deg,rgba(0,0,0,.76),rgba(0,0,0,.45));transition:opacity 1.2s;z-index:3}#intro.hidden{opacity:0;pointer-events:none}.card{width:min(570px,90vw);text-align:center;padding:32px}.eyebrow{font:10px system-ui,sans-serif;letter-spacing:5px;text-transform:uppercase;color:#b7abce}h1{font-weight:normal;font-size:clamp(52px,9vw,92px);line-height:1;letter-spacing:-3px;margin:25px 0;background:linear-gradient(100deg,#edba94,#efd9fa,#9edede);-webkit-background-clip:text;background-clip:text;color:transparent}.subtitle{font-style:italic;font-size:19px;color:#c4bacb;line-height:1.7}.enter{margin:26px 0 22px;padding:15px 35px;border:1px solid #8f7d9e80;border-radius:40px;background:#21192865;letter-spacing:3px;font:11px system-ui,sans-serif;text-transform:uppercase;transition:background .3s}.enter:hover,.enter:focus-visible{background:#5b3a6865;outline:1px solid #e1c5ef}.instructions{font:11px system-ui,sans-serif;line-height:2;color:#aaa0b5;letter-spacing:.5px}#hud{position:fixed;inset:0;pointer-events:none;opacity:0;transition:opacity 1s}#hud.visible{opacity:1}.brand{position:absolute;left:32px;top:28px;font-size:20px;letter-spacing:1px;color:#d9c9e7}.brand small{display:block;font:8px system-ui,sans-serif;letter-spacing:3px;margin-top:9px;color:#8b829b}.controls{position:absolute;right:24px;top:22px;display:flex;gap:8px;pointer-events:auto}.icon{border:1px solid #79708450;background:#0c0a1280;border-radius:22px;padding:10px 14px;font:10px system-ui,sans-serif;letter-spacing:1px}.icon:hover{background:#302039}.bottom{position:absolute;bottom:28px;left:0;right:0;text-align:center;font:10px system-ui,sans-serif;letter-spacing:2px;color:#8d839e}.message{position:absolute;top:20%;left:0;right:0;text-align:center;font-style:italic;font-size:19px;color:#d8c8e4;opacity:0;transition:opacity 2s;text-shadow:0 0 20px #b688d8}.message.show{opacity:1}#touch{position:fixed;bottom:65px;left:20px;right:20px;display:none;justify-content:space-between;pointer-events:none}#touch button{pointer-events:auto;touch-action:none;border:1px solid #a38ab544;background:#15102199;border-radius:50%;width:56px;height:56px;font:19px system-ui;color:#d2bfdc}#touch .group{display:flex;gap:10px}#help{position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:#000b;z-index:4}#help.open{display:flex}#help .card{max-height:90vh;overflow:auto;background:#0d0913;border:1px solid #59436a;border-radius:18px}#help h2{font-weight:normal;font-size:32px}#help p{font:14px system-ui;line-height:2;color:#c5b5d2}@media(pointer:coarse){#touch.visible{display:flex}.bottom{font-size:8px;bottom:20px}.brand{left:20px;top:22px}.controls{right:12px}.instructions .desktop{display:none}}@media(prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
 </head>
 <body>
 <canvas id="forest" aria-label="A third-person neon forest. Control a luminous fox with arrow keys or WASD; Shift to run, Space to leap. Hold the right mouse button and drag to orbit the camera." role="img"></canvas>
 <div id="intro"><div class="card"><div class="eyebrow">A small journey through the dark</div><h1>Rainbow Fox</h1><div class="subtitle">The forest remembers every footstep.<br>Follow the lights. Leave a little of your own.</div><button class="enter" id="enter">Enter the forest</button><div class="instructions"><span class="desktop">WASD / ARROWS &nbsp; wander &nbsp; · &nbsp; SHIFT &nbsp; run &nbsp; · &nbsp; SPACE &nbsp; leap<br>RIGHT MOUSE + DRAG &nbsp; look around &nbsp; · &nbsp; WHEEL &nbsp; zoom<br></span>Headphones welcome. No destination required.</div></div></div>
-<div id="hud"><div class="brand">Rainbow Fox<small>A FOREST OF LIGHT</small></div><div class="controls"><button class="icon" id="sound" aria-pressed="false">Sound off</button><button class="icon" id="helpButton">Guide</button><button class="icon" id="pause">Pause</button></div><div class="message" id="message"></div><div class="bottom">WANDER FREELY &nbsp; / &nbsp; FOLLOW THE DRIFTING LIGHTS</div></div>
+<div id="hud"><div class="brand">Rainbow Fox<small id="sceneLabel">A FOREST OF LIGHT</small></div><div class="controls"><button class="icon" id="sound" aria-pressed="false">Sound off</button><button class="icon" id="helpButton">Guide</button><button class="icon" id="pause">Pause</button></div><div class="message" id="message"></div><div class="bottom" id="journeyHint">WANDER FREELY &nbsp; / &nbsp; FOLLOW THE DRIFTING LIGHTS</div></div>
 <div id="touch"><div class="group"><button data-key="arrowleft" aria-label="Turn left">↶</button><button data-key="arrowup" aria-label="Walk forward">↑</button><button data-key="arrowright" aria-label="Turn right">↷</button></div><div class="group"><button data-key="shift" aria-label="Run">Run</button><button data-key=" " aria-label="Leap">✧</button></div></div>
-<div id="help"><div class="card"><div class="eyebrow">Find your own pace</div><h2>Nothing is chasing you.</h2><p>W / ↑ moves forward. S / ↓ steps back.<br>A / ← and D / → turn through the forest.<br>Right mouse + drag orbits the camera. Wheel zooms.<br>The camera moves independently of the fox.<br>W / S keep her direction; A / D turn her body.<br>Hold Shift to run. Press Space to leap.<br>Escape pauses. Sound is optional.</p><p>Approach the little clusters of floating lights.<br>They will remember you, then drift away.</p><button class="enter" id="closeHelp">Return to the trees</button></div></div>
+<div id="help"><div class="card"><div class="eyebrow">Find your own pace</div><h2>Nothing is chasing you.</h2><p>W / ↑ moves forward. S / ↓ steps back.<br>A / ← and D / → turn through the forest.<br>Right mouse + drag orbits the camera. Wheel zooms.<br>The camera moves independently of the fox.<br>W / S keep her direction; A / D turn her body.<br>Hold Shift to run. Press Space to leap.<br>Escape pauses. Sound is optional.</p><p>Approach the little clusters of floating lights.<br>Follow the low lights to the reflecting pool.<br>Walk across it to find the stars.<br>In space, approach the tree constellation to return.</p><button class="enter" id="closeHelp">Return to the journey</button></div></div>
 <script>
 'use strict';
 (() => {
@@ -53,6 +53,7 @@ for(let n=0;n<100;n++){
   const a=rand()*6.28,by=height*(.35+rand()*.35);
   for(let i=0;i<26;i++){const u=i/26;points.push([Math.cos(a)*u*2.7,by+u*2,Math.sin(a)*u*2.7,Math.floor((base+u*2)%7),.6]);}
  }
+ if(Math.abs(x)<3.5&&z>-4&&z<75)x=(x<0?-1:1)*(7+rand()*5);
  trees.push({x,z,points,height});
 }
 for(let i=0;i<2200;i++)ground.push({x:(rand()-.5)*radius*2,z:(rand()-.5)*radius*2,y:rand()*.08,c:Math.floor(rand()*7),s:.5+rand()});
@@ -167,7 +168,10 @@ function foxDot(x,y,z,c,s,body=false){
   const bx=x*cr-h*sr;y=1.04+x*sr+h*cr;x=bx;
  }
  const sa=Math.sin(fox.a),ca=Math.cos(fox.a);
- dot(fox.x+x*ca+z*sa,y+fox.jump,fox.z+z*ca-x*sa,furColors[c],s,.68);
+ const wx=fox.x+x*ca+z*sa,wz=fox.z+z*ca-x*sa;
+ dot(wx,y+fox.jump,wz,furColors[c],s,.68);
+ const pool=poolPosition();
+ if(journey.blend<.95&&Math.hypot(wx-pool.x,wz-pool.z)<7.6)dot(wx,-(y+fox.jump)*.7,wz,furColors[c],s*.75,(1-journey.blend)*.10);
 }
 function drawPart(name,transform){for(const p of parts[name]){const q=transform?transform(p):p;foxDot(q[0],q[1],q[2],p[3],.006+p[4]*.0055,name==='body');}}
 function limbSegment(a,b,ra,rb,dark){
@@ -253,6 +257,214 @@ function drawFox(){
   drawPart('paw',p=>[p[0]+paw[0],p[1]+paw[1]-.065,p[2]+paw[2]]);
  }
 }
+// The crossing is spatial: stopping or turning back on the pool is always allowed.
+const forestOrigin={x:0,z:0};
+const stillwater={x:0,z:52,r:8};
+const journey={realm:'forest',phase:'rest',blend:0,target:0,armed:true,age:0,nearPool:false,nearHome:false,crossX:0,crossZ:0,dirX:0,dirZ:1,spaceX:0,spaceZ:0};
+const ripples=[];
+let rippleQuarter=0;
+const smooth=u=>{u=clamp(u,0,1);return u*u*(3-2*u);};
+const poolPosition=()=>({x:forestOrigin.x+stillwater.x,z:forestOrigin.z+stillwater.z});
+function spacePoint(q,s){return {x:journey.spaceX+journey.dirX*s+journey.dirZ*q,z:journey.spaceZ+journey.dirZ*s-journey.dirX*q};}
+function spaceLocal(x,z){const dx=x-journey.spaceX,dz=z-journey.spaceZ;return {q:dx*journey.dirZ-dz*journey.dirX,s:dx*journey.dirX+dz*journey.dirZ};}
+function ribbonCenter(s){return 8*Math.sin((s-18)/28)+4*Math.sin((s-18)/57);}
+function branchCenter(s){return ribbonCenter(s)+(s>100&&s<190?18*Math.sin((s-100)/90*Math.PI):0);}
+function homePosition(){return spacePoint(ribbonCenter(82)+4,82);}
+const skyStars=[],nebulaDust=[],poolStars=[];
+for(let i=0;i<2400;i++){
+ const lon=rand()*TAU,lat=Math.asin(rand()*2-1);
+ skyStars.push({x:Math.cos(lat)*Math.sin(lon),y:Math.sin(lat),z:Math.cos(lat)*Math.cos(lon),size:.65+Math.pow(rand(),5)*1.8,c:i%9<5?'#dbe8ff':colors[i%7],phase:rand()*TAU});
+}
+for(let i=0;i<460;i++)nebulaDust.push({u:rand(),v:rand()*2-1,c:i%7,phase:rand()*TAU});
+for(let i=0;i<350;i++){const a=rand()*TAU,r=Math.sqrt(rand())*7.9;poolStars.push({x:Math.cos(a)*r,z:Math.sin(a)*r,c:i%7,s:.01+rand()*.02,phase:rand()*TAU});}
+function updateJourney(dt,moved){
+ if(!started)return;
+ journey.age+=dt;
+ const pool=poolPosition(),distance=Math.hypot(fox.x-pool.x,fox.z-pool.z);
+ if(journey.realm==='forest'&&journey.phase==='rest'){
+  if(!journey.armed&&distance>18)journey.armed=true;
+  if(distance<22&&!journey.nearPool){journey.nearPool=true;message('The stars have gathered in the stillwater.');}
+  if(distance>28)journey.nearPool=false;
+  if(journey.armed&&distance<7.8&&moved>.002&&fox.jump===0){
+   journey.phase='outbound';journey.crossX=fox.x;journey.crossZ=fox.z;
+   const speed=Math.hypot(fox.vx,fox.vz)||1;journey.dirX=fox.vx/speed;journey.dirZ=fox.vz/speed;
+   journey.spaceX=fox.x;journey.spaceZ=fox.z;journey.age=0;
+   message('Walk a little farther. The sky will hold you.');
+  }
+ }
+ if(journey.phase==='outbound'){
+  const dx=fox.x-journey.crossX,dz=fox.z-journey.crossZ;
+  const progress=dx*journey.dirX+dz*journey.dirZ,side=dx*journey.dirZ-dz*journey.dirX;
+  journey.target=smooth(progress/18);
+  if(progress<-.5||(Math.abs(side)>13&&progress<14)){
+   journey.phase='rest';journey.target=0;journey.armed=false;
+   message('The forest is happy to keep you a little longer.');
+  }else if(progress>=18&&journey.blend>.96){
+   journey.realm='space';journey.phase='rest';journey.target=1;journey.age=0;
+   message('A ribbon of stardust. A thousand ways to wander.');
+  }
+ }
+ if(journey.realm==='space'&&journey.phase==='rest'){
+  const home=homePosition(),d=Math.hypot(fox.x-home.x,fox.z-home.z);
+  if(d<25&&!journey.nearHome){journey.nearHome=true;message('That constellation remembers being a tree.');}
+  if(d>30)journey.nearHome=false;
+  if(d<3.1&&moved>.002&&journey.age>3&&fox.jump===0){
+   journey.phase='inbound';journey.age=0;
+   // Place the clearing exactly under the constellation. No position teleport is needed.
+   forestOrigin.x=home.x-stillwater.x;forestOrigin.z=home.z-stillwater.z;
+   journey.armed=false;journey.nearPool=true;
+   message('There is always a way home.');
+  }
+ }
+ if(journey.phase==='inbound'){
+  journey.target=1-smooth(journey.age/5.5);
+  if(journey.age>5.5&&journey.blend<.035){
+   journey.realm='forest';journey.phase='rest';journey.target=0;journey.age=0;
+   journey.nearHome=false;message('The trees kept a place for you.');
+  }
+ }
+ journey.blend+=(journey.target-journey.blend)*(1-Math.exp(-dt*4));
+ if(Math.abs(journey.target-journey.blend)<.0001)journey.blend=journey.target;
+ const quarter=Math.floor(fox.gait*4);
+ if(quarter!==rippleQuarter&&fox.jump===0&&moved>.002&&(distance<8||journey.blend>.55)){
+  const side=quarter%2?-.22:.22,front=quarter<2?.46:-.54;
+  const foot=pawWorld(side,front);ripples.push({x:foot[0],z:foot[1],age:0});
+ }
+ rippleQuarter=quarter;
+ for(let i=ripples.length-1;i>=0;i--){ripples[i].age+=dt;if(ripples[i].age>3.2)ripples.splice(i,1);}
+ if(audio){
+  const now=audio.context.currentTime;
+  audio.wind.gain.setTargetAtTime(mix(.3,.055,journey.blend),now,.6);
+  audio.cosmic.gain.setTargetAtTime(journey.blend*.13,now,.6);
+ }
+ if(Math.floor(t*2)!==Math.floor((t-dt)*2)){
+  $('sceneLabel').textContent=journey.phase==='inbound'?'THE WAY HOME':journey.blend>.6?'A SEA OF STARS':journey.phase==='outbound'?'WHERE THE FOREST BECOMES SKY':'A FOREST OF LIGHT';
+  const target=journey.realm==='space'?homePosition():poolPosition();
+  const bearing=angleDelta(Math.atan2(target.x-fox.x,target.z-fox.z),fox.a);
+  const direction=Math.abs(bearing)<.45?'AHEAD':Math.abs(bearing)>2.4?'BEHIND YOU':bearing>0?'TO YOUR RIGHT':'TO YOUR LEFT';
+  $('journeyHint').textContent=journey.phase==='inbound'?'THE TREES ARE FINDING YOU AGAIN':journey.phase==='outbound'?'CONTINUE INTO THE LIGHT · OR TURN BACK':journey.realm==='space'?'A TREE OF STARS · '+direction+' · OR WANDER ON':'THE STILLWATER · '+direction+' · FOLLOW THE LOW LIGHTS';
+ }
+}
+function constrainRibbon(){
+ if(journey.realm!=='space'||journey.phase!=='rest')return;
+ const local=spaceLocal(fox.x,fox.z),a=ribbonCenter(local.s),b=branchCenter(local.s);
+ const center=Math.abs(local.q-a)<Math.abs(local.q-b)?a:b;
+ if(Math.abs(local.q-center)>7.6){
+  const p=spacePoint(center+clamp(local.q-center,-7.6,7.6),local.s);fox.x=p.x;fox.z=p.z;
+ }
+}
+function skyProject(x,y,z){
+ // The sky lives at infinity; changing position gives local dust parallax, not sky wrapping.
+ const wx=x*journey.dirZ+z*journey.dirX,wz=z*journey.dirZ-x*journey.dirX;
+ const horizontal=wx*camSin+wz*camCos,depth=horizontal*pitchCos-y*pitchSin;
+ if(depth<.12)return null;
+ const side=wx*camCos-wz*camSin,up=y*pitchCos+horizontal*pitchSin;
+ return [W*.5+side*focal/depth,horizon-up*focal/depth,depth];
+}
+function celestialPoint(lon,lat){return skyProject(Math.cos(lat)*Math.sin(lon),Math.sin(lat),Math.cos(lat)*Math.cos(lon));}
+function drawSky(){
+ const blend=journey.blend;if(blend<.001)return;
+ ctx.save();ctx.globalCompositeOperation='lighter';
+ for(const cloud of [{lon:.45,lat:.045,c:'90,45,160',r:.5},{lon:-.7,lat:.18,c:'36,96,145',r:.5},{lon:.9,lat:-.08,c:'130,47,88',r:.35}]){
+  const p=celestialPoint(cloud.lon,cloud.lat);if(!p)continue;
+  const radius=Math.min(W,H)*cloud.r/p[2],g=ctx.createRadialGradient(p[0],p[1],0,p[0],p[1],radius);
+  g.addColorStop(0,`rgba(${cloud.c},${.28*blend})`);g.addColorStop(.45,`rgba(${cloud.c},${.11*blend})`);g.addColorStop(1,`rgba(${cloud.c},0)`);
+  ctx.fillStyle=g;ctx.fillRect(0,0,W,H);
+ }
+ for(const star of skyStars){
+  const p=skyProject(star.x,star.y,star.z);if(!p||p[0]<0||p[0]>W||p[1]<0||p[1]>H)continue;
+  const twinkle=reduced?1:.8+.2*Math.sin(t*.8+star.phase);
+  ctx.globalAlpha=blend*twinkle*.8;ctx.fillStyle=star.c;ctx.beginPath();ctx.arc(p[0],p[1],star.size,0,TAU);ctx.fill();
+  if(star.size>1.7){ctx.globalAlpha=blend*.2;ctx.fillRect(p[0]-4,p[1]-.4,8,.8);ctx.fillRect(p[0]-.4,p[1]-4,.8,8);}
+ }
+ for(const dust of nebulaDust){
+  const p=celestialPoint(-.9+dust.u*2.1,.06+Math.sin(dust.u*5)*.075+dust.v*.08);if(!p)continue;
+  ctx.globalAlpha=blend*.16;ctx.fillStyle=colors[dust.c];ctx.beginPath();ctx.arc(p[0],p[1],2+Math.sin(dust.phase)*1.2,0,TAU);ctx.fill();
+ }
+ // Faint echoes of branches: constellations that remember the forest.
+ for(const echo of [{lon:.8,lat:.05},{lon:-1.05,lat:-.08},{lon:2.5,lat:.10}]){
+  for(const [a,b] of constellationEdges){
+   const pa=celestialPoint(echo.lon+a[0]*.02,echo.lat+a[1]*.02),pb=celestialPoint(echo.lon+b[0]*.02,echo.lat+b[1]*.02);
+   if(!pa||!pb)continue;
+   ctx.strokeStyle='#98b3db';ctx.globalAlpha=blend*.12;ctx.lineWidth=.7;ctx.beginPath();ctx.moveTo(pa[0],pa[1]);ctx.lineTo(pb[0],pb[1]);ctx.stroke();
+   ctx.globalAlpha=blend*.38;ctx.fillStyle='#bfcfe7';ctx.beginPath();ctx.arc(pb[0],pb[1],1.2,0,TAU);ctx.fill();
+  }
+ }
+ // A quiet, distant ringed world offers a scale reference beside the nebulae.
+ const planet=celestialPoint(-.56,.035);
+ if(planet){
+  const r=Math.min(W,H)*.053/planet[2];ctx.globalAlpha=blend;
+  const g=ctx.createRadialGradient(planet[0]-r*.38,planet[1]-r*.4,r*.08,planet[0],planet[1],r);
+  g.addColorStop(0,'#c3adc8');g.addColorStop(.32,'#58658b');g.addColorStop(.8,'#161827');g.addColorStop(1,'#03040b');
+  ctx.globalCompositeOperation='source-over';ctx.fillStyle=g;ctx.beginPath();ctx.arc(planet[0],planet[1],r,0,TAU);ctx.fill();
+  ctx.strokeStyle='#a6b6dd';ctx.lineWidth=1;ctx.globalAlpha=blend*.36;ctx.beginPath();ctx.ellipse(planet[0],planet[1],r*1.7,r*.3,-.32,0,TAU);ctx.stroke();
+ }
+ ctx.restore();
+}
+function poolPath(pool){
+ ctx.beginPath();let first=true;
+ for(let i=0;i<=64;i++){const a=i/64*TAU,p=project(pool.x+Math.cos(a)*8,.015,pool.z+Math.sin(a)*8);if(!p)continue;if(first){ctx.moveTo(p[0],p[1]);first=false;}else ctx.lineTo(p[0],p[1]);}
+ ctx.closePath();
+}
+function drawStillwater(){
+ const alpha=1-journey.blend;if(alpha<.005)return;
+ const pool=poolPosition();ctx.save();poolPath(pool);ctx.globalAlpha=alpha*.8;ctx.fillStyle='#080c19';ctx.fill();ctx.clip();
+ // The dark pool mirrors a sparse scattering of stars before the sky has opened.
+ for(const star of poolStars){const p=project(pool.x+star.x,-.025,pool.z+star.z);if(!p)continue;ctx.globalAlpha=alpha*(.24+.14*Math.sin(t*.7+star.phase));ctx.fillStyle=colors[star.c];ctx.beginPath();ctx.arc(p[0],p[1],Math.max(.7,star.s*focal/p[2]),0,TAU);ctx.fill();}
+ ctx.restore();
+ for(let i=0;i<160;i++){const a=i/160*TAU;dot(pool.x+Math.cos(a)*8,.04,pool.z+Math.sin(a)*8,colors[i%7],.035,alpha*.65);}
+}
+function drawGuidingLights(){
+ const pool=poolPosition(),alpha=1-journey.blend;
+ for(let i=0;i<100;i++){
+  const z=pool.z-52+i*.49,x=pool.x+Math.sin(i*.15)*.45;
+  dot(x,.16+Math.sin(t*.8+i)*.05,z,colors[(i+4)%7],i%8===0?.06:.022,alpha*(.35+.15*Math.sin(t-i*.18)));
+ }
+ for(let i=0;i<60;i++){
+  const a=i*2.4,y=4+(i%17)*.52,r=9+(i%6)*.7;
+  dot(pool.x+Math.sin(a)*r,y+journey.blend*12,pool.z+Math.cos(a)*r,colors[i%7],.042,alpha*.5);
+ }
+}
+function drawRibbon(){
+ const blend=journey.blend;if(blend<.001)return;
+ const local=spaceLocal(fox.x,fox.z);
+ const begin=Math.floor((local.s-30)/.55)*.55;
+ for(let i=0;i<200;i++){
+  const s=begin+i*.55,center=ribbonCenter(s),fork=branchCenter(s);
+  for(let j=0;j<11;j++){
+   const q=center+Math.sin(i*9.13+j*4.19)*7.3;
+   const p=spacePoint(q,s);dot(p.x,.018+Math.sin(i+j)*.018,p.z,colors[(i+j+4)%7],.02+(j%3)*.008,blend*(.35+.18*Math.cos((q-center)*.2)));
+  }
+  for(const q of [center-7.4,center+7.4]){const p=spacePoint(q,s);dot(p.x,.06,p.z,i%4===0?'#e0d5ff':'#7986d9',.03,blend*.7);}
+  if(fork!==center){for(let j=0;j<6;j++){const p=spacePoint(fork+Math.sin(i*6.71+j*2.13)*6,s);dot(p.x,.04,p.z,colors[(i+j)%7],.024,blend*.5);}}
+ }
+ // Nearby, sparse star clouds drift below the path, giving movement real depth.
+ for(let i=0;i<200;i++){
+  const s=Math.floor(local.s/60)*60+(i%70)*1.8-50,q=Math.sin(i*2.399)*30;
+  const p=spacePoint(q,s);dot(p.x,-4-(i%15)*.6,p.z,colors[i%7],.025,blend*.5);
+ }
+}
+const constellationEdges=[[[0,0,0],[0,5.8,0]],[[0,2.1,0],[-1.8,3.1,0]],[[0,2.6,0],[2.1,3.8,0]],[[0,3.5,0],[-2.3,4.9,0]],[[0,4,0],[2.4,5.3,0]],[[0,4.8,0],[-1.3,6.3,0]],[[0,5.1,0],[1.2,6.5,0]]];
+function drawHomeTree(){
+ if(journey.blend<.001)return;
+ const home=homePosition();
+ const node=a=>[home.x+a[0]*journey.dirZ,a[1],home.z-a[0]*journey.dirX];
+ for(const [a,b] of constellationEdges){
+  const pa=project(...node(a)),pb=project(...node(b));
+  if(pa&&pb){ctx.save();ctx.strokeStyle='#98c2d5';ctx.globalAlpha=journey.blend*.24;ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(pa[0],pa[1]);ctx.lineTo(pb[0],pb[1]);ctx.stroke();ctx.restore();}
+  for(let i=0;i<=20;i++){const u=i/20;dot(...node([mix(a[0],b[0],u),mix(a[1],b[1],u),0]),'#bcefff',i%20===0?.1:.022,journey.blend*.85);}
+ }
+ for(let i=0;i<70;i++){const a=i/70*TAU;dot(home.x+Math.sin(a)*3,.06,home.z+Math.cos(a)*3,colors[(i+3)%7],.025,journey.blend*.6);}
+ const title=project(home.x,7.3,home.z);
+ if(title&&title[2]<45){ctx.save();ctx.globalAlpha=journey.blend*clamp(1-title[2]/55,0,1);ctx.fillStyle='#c5d6e5';ctx.font='italic 16px Georgia';ctx.textAlign='center';ctx.fillText('A way home',title[0],title[1]);ctx.restore();}
+}
+function drawRipples(){
+ for(const ripple of ripples){
+  const r=.13+ripple.age*.65,alpha=(1-ripple.age/3.2)*.5;
+  for(let j=0;j<45;j++){const a=j/45*TAU+ripple.age*.5,spiral=r*(.45+.55*j/45);dot(ripple.x+Math.cos(a)*spiral,.025,ripple.z+Math.sin(a)*spiral,colors[(j+4)%7],.018,alpha);}
+ }
+}
+
 let messageUntil=0,messageIndex=0,discoveries=0;
 const messages=['Let the dark make room for you.','Some lights are only passing through.','Even here, you are not alone.','The trees keep your little secrets.','There is no hurry to arrive.'];
 function message(text){$('message').textContent=text;$('message').classList.add('show');messageUntil=t+7;}
@@ -273,7 +485,8 @@ function update(dt){
  const oldX=fox.x,oldZ=fox.z;
  fox.x+=fox.vx*dt;fox.z+=fox.vz*dt;
  // Soft collision gently slides the fox around trunks.
- for(const tree of trees){const x=wrap(tree.x,fox.x),z=wrap(tree.z,fox.z),dx=fox.x-x,dz=fox.z-z,d=Math.hypot(dx,dz);if(d<.85){const a=d>.001?Math.atan2(dx,dz):fox.a+Math.PI/2;fox.x=x+Math.sin(a)*.85;fox.z=z+Math.cos(a)*.85;}}
+ for(const tree of trees){if(journey.blend>.6)break;const x=wrap(tree.x+forestOrigin.x,fox.x),z=wrap(tree.z+forestOrigin.z,fox.z);const pool=poolPosition();if(Math.hypot(x-pool.x,z-pool.z)<18)continue;const dx=fox.x-x,dz=fox.z-z,d=Math.hypot(dx,dz);if(d<.85){const a=d>.001?Math.atan2(dx,dz):fox.a+Math.PI/2;fox.x=x+Math.sin(a)*.85;fox.z=z+Math.cos(a)*.85;}}
+ constrainRibbon();
  const moved=Math.hypot(fox.x-oldX,fox.z-oldZ),actualSpeed=moved/dt;
  fox.activity+=(clamp(actualSpeed/.7,0,1)-fox.activity)*(1-Math.exp(-dt*9));
  const run=clamp((actualSpeed-3.5)/3.5,0,1);
@@ -281,6 +494,7 @@ function update(dt){
  fox.landing*=Math.exp(-dt*10);
  if(fox.jump>0||fox.vy>0){fox.vy-=dt*12;fox.jump=Math.max(0,fox.jump+fox.vy*dt);if(fox.jump===0){fox.vy=0;fox.landing=1;}}
  updatePivot(dt,actualSpeed);
+ updateJourney(dt,moved);
  const lag=1-Math.exp(-dt*6);
  // An idle orbit stays where you leave it; walking normally restores the chase view.
  if(!orbit.active&&(actualSpeed>.15||turning))camera.yaw+=angleDelta(fox.a,camera.yaw)*(1-Math.exp(-dt*3));
@@ -289,13 +503,13 @@ function update(dt){
  camera.distance+=(camera.zoom-camera.distance)*lag;
  camera.focusX+=(fox.x-camera.focusX)*lag;camera.focusZ+=(fox.z-camera.focusZ)*lag;
  camera.focusY+=(1+fox.jump*.45-camera.focusY)*lag;
- const distance=camera.distance+Math.abs(fox.speed)*.035;
+ const distance=camera.distance+Math.abs(fox.speed)*.035+journey.blend*2.2;
  camera.x=camera.focusX-Math.sin(camera.a)*Math.cos(camera.pitch)*distance;
  camera.z=camera.focusZ-Math.cos(camera.a)*Math.cos(camera.pitch)*distance;
  camera.y=camera.focusY+Math.sin(camera.pitch)*distance;
  if(started&&Math.abs(fox.speed)>.8&&rand()<dt*35){trails.push({x:fox.x+(rand()-.5)*.5,y:.1,z:fox.z-.3,life:1,c:colors[Math.floor(rand()*7)]});}
  for(let i=trails.length-1;i>=0;i--){trails[i].life-=dt*.45;trails[i].y+=dt*.13;if(trails[i].life<=0)trails.splice(i,1);}
- for(const w of wisps){const x=wrap(w.x,fox.x),z=wrap(w.z,fox.z);if(started&&!w.found&&Math.hypot(x-fox.x,z-fox.z)<3.5){w.found=true;w.when=t;discoveries++;message(messages[messageIndex++%messages.length]);if(audio){chime(440+70*w.c,.35);setTimeout(()=>{if(audio&&!paused)chime(660+100*w.c,.5);},220);}}if(w.found&&t-w.when>35){w.found=false;w.x=fox.x+(rand()-.5)*100;w.z=fox.z+(rand()-.5)*100;}}
+ for(const w of wisps){const x=wrap(w.x+forestOrigin.x,fox.x),z=wrap(w.z+forestOrigin.z,fox.z);if(started&&journey.realm==='forest'&&journey.blend<.15&&journey.phase==='rest'&&!w.found&&Math.hypot(x-fox.x,z-fox.z)<3.5){w.found=true;w.when=t;discoveries++;message(messages[messageIndex++%messages.length]);if(audio){chime(440+70*w.c,.35);setTimeout(()=>{if(audio&&!paused)chime(660+100*w.c,.5);},220);}}if(w.found&&t-w.when>35){w.found=false;w.x=fox.x-forestOrigin.x+(rand()-.5)*100;w.z=fox.z-forestOrigin.z+(rand()-.5)*100;}}
  if(t>messageUntil)$('message').classList.remove('show');
  if(audio)audio.gain.gain.setTargetAtTime(paused?0:.12+Math.abs(fox.speed)*.005,audio.context.currentTime,.3);
 }
@@ -303,15 +517,17 @@ function render(){
  ctx.fillStyle='#000';ctx.fillRect(0,0,W,H);camSin=Math.sin(camera.a);camCos=Math.cos(camera.a);pitchSin=Math.sin(camera.pitch);pitchCos=Math.cos(camera.pitch);dots.length=0;
  // Fine pools of color are atmospheric light, not visible solid ground.
  const haze=ctx.createRadialGradient(W*.5,H*.5,0,W*.5,H*.5,Math.max(W,H)*.6);haze.addColorStop(0,'#100a1a');haze.addColorStop(.6,'#030408');haze.addColorStop(1,'#000');ctx.fillStyle=haze;ctx.fillRect(0,0,W,H);
- for(const g of ground){const x=wrap(g.x,fox.x),z=wrap(g.z,fox.z);dot(x,g.y,z,colors[g.c],.037*g.s,.72);}
- for(const tree of trees){const x=wrap(tree.x,fox.x),z=wrap(tree.z,fox.z);const center=project(x,tree.height*.5,z);if(!center||center[0]<-W*.45||center[0]>W*1.45)continue;
+ drawSky();drawStillwater();drawGuidingLights();drawRibbon();drawHomeTree();drawRipples();
+ const forestAlpha=1-journey.blend,pool=poolPosition();
+ if(forestAlpha>.005)for(const g of ground){const x=wrap(g.x+forestOrigin.x,fox.x),z=wrap(g.z+forestOrigin.z,fox.z);if(Math.hypot(x-pool.x,z-pool.z)<8)continue;dot(x,g.y,z,colors[g.c],.037*g.s,.72*forestAlpha);}
+ if(forestAlpha>.005)for(const tree of trees){const x=wrap(tree.x+forestOrigin.x,fox.x),z=wrap(tree.z+forestOrigin.z,fox.z);const clearing=Math.hypot(x-pool.x,z-pool.z);if(clearing<18)continue;const center=project(x,tree.height*.5,z);if(!center||center[0]<-W*.45||center[0]>W*1.45)continue;
   const dist=Math.hypot(x-camera.x,z-camera.z);if(dist>87)continue;
-  const alpha=Math.max(.08,1-dist/100);
-  for(const p of tree.points)dot(x+p[0],p[1],z+p[2],colors[p[3]],.06*p[4],alpha);
+  const alpha=Math.max(.08,1-dist/100)*forestAlpha*smooth((clearing-18)/8);
+  for(const p of tree.points)dot(x+p[0],p[1]+journey.blend*p[1]*1.2,z+p[2],colors[p[3]],.06*p[4],alpha);
  }
- for(const w of wisps){const x=wrap(w.x,fox.x),z=wrap(w.z,fox.z),age=w.found?t-w.when:0;
+ if(forestAlpha>.005)for(const w of wisps){const x=wrap(w.x+forestOrigin.x,fox.x),z=wrap(w.z+forestOrigin.z,fox.z),age=w.found?t-w.when:0;
   const y=w.y+Math.sin(t*.7+w.phase)*.3+(w.found?Math.min(age*.3,5):0),a=w.found?Math.max(0,1-age/8):.85;
-  for(let j=0;j<14;j++){const phase=w.phase+j*2.4+t*.4,r=.2+(j%3)*.12;dot(x+Math.sin(phase)*r,y+Math.cos(phase*1.3)*r,z+Math.cos(phase)*r,colors[(w.c+j)%7],j===0?.085:.026,a);}
+  for(let j=0;j<14;j++){const phase=w.phase+j*2.4+t*.4,r=.2+(j%3)*.12;dot(x+Math.sin(phase)*r,y+Math.cos(phase*1.3)*r,z+Math.cos(phase)*r,colors[(w.c+j)%7],j===0?.085:.026,a*forestAlpha);}
  }
  // Sparse airborne motes drift through the depth of the scene.
  for(let i=0;i<110;i++){const a=i*2.399;dot(fox.x+Math.sin(a)*((i%19)+2),.4+(i%13)*.44+Math.sin(t*.5+i)*.22,fox.z+Math.cos(a)*((i%29)+3),colors[i%7],.015,.35+Math.sin(t+i)*.15);}
@@ -327,7 +543,10 @@ let audio=null;
 function initAudio(){const AC=window.AudioContext||window.webkitAudioContext;if(!AC)return false;const ac=new AC(),gain=ac.createGain();gain.gain.value=.12;gain.connect(ac.destination);
  const oscillators=[];for(const [i,f] of [55,82.41,110,164.81,220].entries()){const osc=ac.createOscillator(),g=ac.createGain();osc.type='sine';osc.frequency.value=f;g.gain.value=i<3?.18:.035;osc.connect(g);g.connect(gain);osc.start();oscillators.push(osc);}
  const buffer=ac.createBuffer(1,ac.sampleRate*4,ac.sampleRate),data=buffer.getChannelData(0);let brown=0;for(let i=0;i<data.length;i++){brown=(brown+(Math.random()*2-1)*.02)/1.02;data[i]=brown*2;}
- const wind=ac.createBufferSource(),filter=ac.createBiquadFilter(),wg=ac.createGain();wind.buffer=buffer;wind.loop=true;filter.type='lowpass';filter.frequency.value=650;wg.gain.value=.3;wind.connect(filter);filter.connect(wg);wg.connect(gain);wind.start();audio={context:ac,gain,oscillators};return true;}
+ const wind=ac.createBufferSource(),filter=ac.createBiquadFilter(),wg=ac.createGain();wind.buffer=buffer;wind.loop=true;filter.type='lowpass';filter.frequency.value=650;wg.gain.value=.3;wind.connect(filter);filter.connect(wg);wg.connect(gain);wind.start();
+ const cosmic=ac.createGain();cosmic.gain.value=journey.blend*.13;cosmic.connect(gain);
+ for(const f of [261.63,392,523.25]){const osc=ac.createOscillator(),g=ac.createGain();osc.frequency.value=f;g.gain.value=.15;osc.connect(g);g.connect(cosmic);osc.start();oscillators.push(osc);}
+ audio={context:ac,gain,oscillators,wind:wg,cosmic};return true;}
 function chime(f,duration){if(!audio)return;const ac=audio.context,osc=ac.createOscillator(),g=ac.createGain();osc.type='sine';osc.frequency.value=f;g.gain.setValueAtTime(0,ac.currentTime);g.gain.linearRampToValueAtTime(.22,ac.currentTime+.025);g.gain.exponentialRampToValueAtTime(.001,ac.currentTime+duration+1.5);osc.connect(g);g.connect(audio.gain);osc.start();osc.stop(ac.currentTime+duration+1.6);}
 $('sound').onclick=async()=>{try{if(!audio){if(!initAudio()){$('sound').textContent='Sound unavailable';return;}}const on=$('sound').getAttribute('aria-pressed')!=='true';if(on){await audio.context.resume();}else await audio.context.suspend();$('sound').setAttribute('aria-pressed',String(on));$('sound').textContent=on?'Sound on':'Sound off';}catch{$('sound').textContent='Sound unavailable';}};
 $('enter').onclick=()=>{started=true;$('intro').classList.add('hidden');$('hud').classList.add('visible');$('touch').classList.add('visible');$('enter').blur();message('Take your time. The forest will wait.');};
@@ -363,7 +582,7 @@ addEventListener('keydown',e=>{const k=e.key.toLowerCase();if(['arrowup','arrowd
 addEventListener('keyup',e=>keys.delete(e.key.toLowerCase()));addEventListener('blur',()=>{keys.clear();if(started)setPaused(true);});document.addEventListener('visibilitychange',()=>{if(document.hidden&&started)setPaused(true);last=performance.now();});
 for(const b of document.querySelectorAll('[data-key]')){b.addEventListener('pointerdown',e=>{e.preventDefault();b.setPointerCapture(e.pointerId);keys.add(b.dataset.key);if(b.dataset.key===' ')leap();});for(const evt of ['pointerup','pointercancel','lostpointercapture'])b.addEventListener(evt,()=>keys.delete(b.dataset.key));}
 // Read-only diagnostics for verifying the standalone artifact.
-window.rainbowFox={get state(){return {started,paused,x:fox.x,z:fox.z,speed:fox.speed,jump:fox.jump,heading:fox.a,gait:fox.gait,pivot:fox.pivot,pivotActive,feet:feet.map(p=>[...p]),cameraYaw:camera.a,cameraPitch:camera.pitch,cameraDistance:camera.distance,orbiting:orbit.active,discoveries,particles:dots.length};}};
+window.rainbowFox={get state(){return {started,paused,x:fox.x,z:fox.z,speed:fox.speed,jump:fox.jump,heading:fox.a,gait:fox.gait,pivot:fox.pivot,pivotActive,feet:feet.map(p=>[...p]),cameraYaw:camera.a,cameraPitch:camera.pitch,cameraDistance:camera.distance,orbiting:orbit.active,realm:journey.realm,transition:journey.phase,blend:journey.blend,pool:poolPosition(),home:homePosition(),ribbon:spaceLocal(fox.x,fox.z),ripples:ripples.length,discoveries,particles:dots.length};}};
 requestAnimationFrame(frame);
 })();
 </script>
